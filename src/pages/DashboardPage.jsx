@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   Users, 
   Clock, 
@@ -17,6 +18,9 @@ import Card, { CardHeader, CardTitle, CardContent } from '../components/common/C
 import Avatar from '../components/common/Avatar';
 import Badge from '../components/common/Badge';
 import { useAuth } from '../contexts/AuthContext';
+import { getUserProfile, getUserStudySessions, getUserQuizAttempts } from '../services/userService';
+import { getUserRooms } from '../services/roomService';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 /**
  * Main dashboard page - overview of user's study activity
@@ -24,91 +28,130 @@ import { useAuth } from '../contexts/AuthContext';
  */
 const DashboardPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [userProfile, setUserProfile] = useState(null);
+  const [userRooms, setUserRooms] = useState([]);
+  const [recentSessions, setRecentSessions] = useState([]);
+  const [recentQuizzes, setRecentQuizzes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for dashboard
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      if (!user) return;
+      
+      setLoading(true);
+      
+      try {
+        // Fetch user profile
+        const profileResult = await getUserProfile(user.uid);
+        if (profileResult.success) {
+          setUserProfile(profileResult.user);
+        }
+
+        // Fetch user's rooms
+        const roomsResult = await getUserRooms(user.uid);
+        if (roomsResult.success) {
+          setUserRooms(roomsResult.rooms);
+        }
+
+        // Fetch recent study sessions
+        const sessionsResult = await getUserStudySessions(user.uid, 5);
+        if (sessionsResult.success) {
+          setRecentSessions(sessionsResult.sessions);
+        }
+
+        // Fetch recent quiz attempts
+        const quizzesResult = await getUserQuizAttempts(user.uid, 5);
+        if (quizzesResult.success) {
+          setRecentQuizzes(quizzesResult.attempts);
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-cool-blue-gray flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  const stats = userProfile?.stats || {};
+  const todayStudyTime = '0h 0m'; // TODO: Calculate from today's sessions
+  
   const quickStats = [
     {
       icon: <Clock className="w-6 h-6" />,
-      label: 'Study Time Today',
-      value: '2h 45m',
-      change: '+15%',
+      label: 'Total Study Time',
+      value: `${Math.floor(stats.totalStudyHours || 0)}h`,
+      change: todayStudyTime + ' today',
       color: 'warm-yellow',
     },
     {
       icon: <Users className="w-6 h-6" />,
       label: 'Active Rooms',
-      value: '3',
-      change: '+1',
+      value: userRooms.length.toString(),
+      change: 'Joined rooms',
       color: 'soft-purple',
     },
     {
       icon: <Brain className="w-6 h-6" />,
       label: 'Quizzes Completed',
-      value: '12',
-      change: '+4',
+      value: (stats.totalQuizzesTaken || 0).toString(),
+      change: `${Math.round(stats.averageQuizScore || 0)}% avg`,
       color: 'vibrant-orange',
     },
     {
       icon: <Trophy className="w-6 h-6" />,
       label: 'Current Streak',
-      value: '7 days',
-      change: 'New record!',
+      value: `${stats.currentStreak || 0} days`,
+      change: `Best: ${stats.longestStreak || 0} days`,
       color: 'success-green',
     },
   ];
 
   const recentActivity = [
-    {
+    ...recentQuizzes.map(quiz => ({
       type: 'quiz',
-      title: 'Completed "JavaScript Fundamentals" quiz',
-      score: '92%',
-      time: '2 hours ago',
+      title: `Completed "${quiz.quizTitle || 'Quiz'}"`,
+      score: `${Math.round(quiz.score || 0)}%`,
+      time: formatTimeAgo(quiz.completedAt),
       icon: <Brain className="w-5 h-5" />,
       color: 'vibrant-orange',
-    },
-    {
+    })),
+    ...recentSessions.map(session => ({
       type: 'study',
-      title: 'Studied Computer Science for 45 minutes',
-      time: '3 hours ago',
+      title: `Studied ${session.subject || 'General'} for ${session.duration || 0} minutes`,
+      time: formatTimeAgo(session.endTime || session.startTime),
       icon: <Clock className="w-5 h-5" />,
       color: 'warm-yellow',
-    },
-    {
-      type: 'room',
-      title: 'Joined "CS101 Study Group"',
-      time: '1 day ago',
-      icon: <Users className="w-5 h-5" />,
-      color: 'soft-purple',
-    },
-    {
-      type: 'meeting',
-      title: 'Attended group study session',
-      duration: '1h 30m',
-      time: '2 days ago',
-      icon: <Video className="w-5 h-5" />,
-      color: 'info-blue',
-    },
-  ];
+    })),
+  ].sort((a, b) => {
+    // Sort by time (most recent first)
+    return 0; // Simplified for now
+  }).slice(0, 4);
 
-  const upcomingEvents = [
-    {
-      title: 'Mathematics Quiz Sprint',
-      time: 'Today, 3:00 PM',
-      participants: 8,
-      type: 'quiz',
-    },
-    {
-      title: 'Physics Study Session',
-      time: 'Tomorrow, 10:00 AM',
-      participants: 5,
-      type: 'meeting',
-    },
-    {
-      title: 'Computer Science Exam',
-      time: 'Friday, 9:00 AM',
-      type: 'exam',
-    },
-  ];
+  // Helper function to format time ago
+  const formatTimeAgo = (timestamp) => {
+    if (!timestamp) return 'Recently';
+    
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+    return date.toLocaleDateString();
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -148,14 +191,22 @@ const DashboardPage = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" leftIcon={<Calendar size={18} />}>
+              <Button 
+                variant="ghost" 
+                leftIcon={<Calendar size={18} />}
+                onClick={() => navigate('/private-space')}
+              >
                 Schedule
               </Button>
-              <Button variant="primary" leftIcon={<Plus size={18} />}>
+              <Button 
+                variant="primary" 
+                leftIcon={<Plus size={18} />}
+                onClick={() => navigate('/rooms')}
+              >
                 New Room
               </Button>
               <Avatar
-                src={user?.avatar}
+                src={user?.photoURL}
                 name={user?.displayName}
                 size="md"
                 online
@@ -210,78 +261,102 @@ const DashboardPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {recentActivity.map((activity, index) => (
-                      <div key={index} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-light-cream transition-colors">
-                        <div className={`w-10 h-10 bg-${activity.color} bg-opacity-10 rounded-full flex items-center justify-center`}>
-                          <div className={`text-${activity.color}`}>
-                            {activity.icon}
+                    {recentActivity.length > 0 ? (
+                      recentActivity.map((activity, index) => (
+                        <div key={index} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-light-cream transition-colors">
+                          <div className={`w-10 h-10 bg-${activity.color} bg-opacity-10 rounded-full flex items-center justify-center`}>
+                            <div className={`text-${activity.color}`}>
+                              {activity.icon}
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-primary-black">
+                              {activity.title}
+                            </p>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <p className="text-sm text-muted-gray">{activity.time}</p>
+                              {activity.score && (
+                                <Badge variant="success" size="sm">
+                                  {activity.score}
+                                </Badge>
+                              )}
+                              {activity.duration && (
+                                <Badge variant="info" size="sm">
+                                  {activity.duration}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
-                        <div className="flex-1">
-                          <p className="font-medium text-primary-black">
-                            {activity.title}
-                          </p>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <p className="text-sm text-muted-gray">{activity.time}</p>
-                            {activity.score && (
-                              <Badge variant="success" size="sm">
-                                {activity.score}
-                              </Badge>
-                            )}
-                            {activity.duration && (
-                              <Badge variant="info" size="sm">
-                                {activity.duration}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-muted-gray">
+                        <p>No recent activity yet.</p>
+                        <p className="text-sm mt-2">Start studying to see your activity here!</p>
                       </div>
-                    ))}
+                    )}
                   </div>
-                  <div className="mt-6 text-center">
-                    <Button variant="ghost" rightIcon={<ArrowRight size={16} />}>
-                      View All Activity
-                    </Button>
-                  </div>
+                  {recentActivity.length > 0 && (
+                    <div className="mt-6 text-center">
+                      <Button 
+                        variant="ghost" 
+                        rightIcon={<ArrowRight size={16} />}
+                        onClick={() => navigate('/private-space')}
+                      >
+                        View All Activity
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.section>
 
-            {/* Upcoming Events */}
+            {/* Upcoming Events / My Rooms */}
             <motion.section variants={itemVariants}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Upcoming Events</CardTitle>
+                  <CardTitle>My Study Rooms</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {upcomingEvents.map((event, index) => (
-                      <div key={index} className="p-3 rounded-lg border border-muted-gray border-opacity-20 hover:border-opacity-40 transition-colors">
-                        <h4 className="font-medium text-primary-black mb-1">
-                          {event.title}
-                        </h4>
-                        <p className="text-sm text-muted-gray mb-2">
-                          {event.time}
-                        </p>
-                        {event.participants && (
-                          <div className="flex items-center space-x-2">
-                            <Users size={14} className="text-muted-gray" />
-                            <span className="text-sm text-muted-gray">
-                              {event.participants} participants
-                            </span>
-                          </div>
-                        )}
-                        {event.type === 'exam' && (
-                          <Badge variant="warning" size="sm">
-                            Exam
-                          </Badge>
-                        )}
+                    {userRooms.length > 0 ? (
+                      userRooms.slice(0, 3).map((room, index) => (
+                        <div 
+                          key={index} 
+                          className="p-3 rounded-lg border border-muted-gray border-opacity-20 hover:border-opacity-40 transition-colors cursor-pointer"
+                          onClick={() => navigate(`/room/${room.id}`)}
+                        >
+                          <h4 className="font-medium text-primary-black mb-1">
+                            {room.name}
+                          </h4>
+                          <p className="text-sm text-muted-gray mb-2">
+                            {room.subject || 'General'}
+                          </p>
+                          {room.memberCount && (
+                            <div className="flex items-center space-x-2">
+                              <Users size={14} className="text-muted-gray" />
+                              <span className="text-sm text-muted-gray">
+                                {room.memberCount} members
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-muted-gray">
+                        <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p>No rooms yet.</p>
+                        <p className="text-sm mt-2">Join or create a study room to get started!</p>
                       </div>
-                    ))}
+                    )}
                   </div>
                   <div className="mt-6 text-center">
-                    <Button variant="ghost" rightIcon={<ArrowRight size={16} />}>
-                      View Calendar
+                    <Button 
+                      variant="ghost" 
+                      rightIcon={<ArrowRight size={16} />}
+                      onClick={() => navigate('/rooms')}
+                    >
+                      {userRooms.length > 0 ? 'View All Rooms' : 'Browse Rooms'}
                     </Button>
                   </div>
                 </CardContent>
@@ -295,7 +370,12 @@ const DashboardPage = () => {
               Quick Actions
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card hoverable clickable className="text-center">
+              <Card 
+                hoverable 
+                clickable 
+                className="text-center"
+                onClick={() => navigate('/rooms')}
+              >
                 <div className="w-16 h-16 bg-soft-purple bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Users className="w-8 h-8 text-soft-purple" />
                 </div>
@@ -307,7 +387,12 @@ const DashboardPage = () => {
                 </p>
               </Card>
 
-              <Card hoverable clickable className="text-center">
+              <Card 
+                hoverable 
+                clickable 
+                className="text-center"
+                onClick={() => navigate('/private-space')}
+              >
                 <div className="w-16 h-16 bg-warm-yellow bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Clock className="w-8 h-8 text-warm-yellow" />
                 </div>
@@ -319,7 +404,12 @@ const DashboardPage = () => {
                 </p>
               </Card>
 
-              <Card hoverable clickable className="text-center">
+              <Card 
+                hoverable 
+                clickable 
+                className="text-center"
+                onClick={() => navigate('/private-space')}
+              >
                 <div className="w-16 h-16 bg-vibrant-orange bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Brain className="w-8 h-8 text-vibrant-orange" />
                 </div>
@@ -331,7 +421,12 @@ const DashboardPage = () => {
                 </p>
               </Card>
 
-              <Card hoverable clickable className="text-center">
+              <Card 
+                hoverable 
+                clickable 
+                className="text-center"
+                onClick={() => navigate('/rooms')}
+              >
                 <div className="w-16 h-16 bg-info-blue bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <MessageCircle className="w-8 h-8 text-info-blue" />
                 </div>
