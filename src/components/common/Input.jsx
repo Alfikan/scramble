@@ -49,7 +49,7 @@ const Input = React.forwardRef(({
   const inputClasses = cn(
     'w-full bg-light-cream border-2 rounded-input px-4 py-4',
     'font-medium text-body-text transition-all duration-300 ease-smooth',
-    'placeholder:text-muted-gray placeholder:transition-all placeholder:duration-300',
+    'placeholder:text-gray placeholder:transition-all placeholder:duration-300',
     'focus:outline-none focus:ring-2 focus:ring-vibrant-orange focus:ring-opacity-20',
     'disabled:opacity-50 disabled:cursor-not-allowed',
     {

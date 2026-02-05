@@ -22,7 +22,7 @@ import { useAuth } from '../contexts/AuthContext';
  */
 const AuthPage = () => {
   const navigate = useNavigate();
-  const { signIn, signUp, signInWithGoogle, signInWithMicrosoft, resetPassword } = useAuth();
+  const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
   
   const [mode, setMode] = useState('signin'); // 'signin', 'signup', 'forgot'
   const [loading, setLoading] = useState(false);
@@ -126,10 +126,10 @@ const AuthPage = () => {
     try {
       const result = provider === 'google' 
         ? await signInWithGoogle()
-        : await signInWithMicrosoft();
+        : null;
         
-      if (!result.success) {
-        setError(result.error || 'Social authentication failed');
+      if (!result || !result.success) {
+        setError(result?.error || 'Social authentication failed');
       }
     } catch (err) {
       setError('Social authentication failed');
@@ -252,20 +252,6 @@ const AuthPage = () => {
                     leftIcon={<Chrome size={20} />}
                   >
                     Continue with Google
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    className="w-full border border-muted-gray border-opacity-30 hover:border-opacity-50"
-                    onClick={() => handleSocialAuth('microsoft')}
-                    disabled={loading}
-                    leftIcon={
-                      <div className="w-5 h-5 bg-info-blue rounded-sm flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">M</span>
-                      </div>
-                    }
-                  >
-                    Continue with Microsoft
                   </Button>
                   
                   <div className="relative">

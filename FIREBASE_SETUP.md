@@ -1,6 +1,6 @@
 # Firebase Authentication Setup Guide
 
-This guide will help you set up Firebase Authentication with Google, Microsoft, and email/password providers for the Scramble app.
+This guide will help you set up Firebase Authentication with Google and email/password providers for the Scramble app.
 
 ## Prerequisites
 
@@ -31,36 +31,6 @@ This guide will help you set up Firebase Authentication with Google, Microsoft, 
 4. Add your domain to authorized domains if needed
 5. Click **Save**
 6. Note down the **Web client ID** for later use
-
-### Microsoft Authentication
-1. First, set up Microsoft Azure AD:
-   - Go to [Azure Portal](https://portal.azure.com/)
-   - Navigate to **Azure Active Directory** > **App registrations**
-   - Click **New registration**
-   - Name: "Scramble App"
-   - Supported account types: "Accounts in any organizational directory and personal Microsoft accounts"
-   - Redirect URI: `https://scramble-40e3a.firebaseapp.com/__/auth/handler` (replace with your project ID)
-   - Click **Register**
-
-2. Configure the Azure app:
-   - Go to **Authentication** > **Platform configurations**
-   - Add **Web** platform
-   - Add redirect URI: `https://scramble-40e3a.firebaseapp.com/__/auth/handler`
-   - Enable **ID tokens**
-   - Save changes
-
-3. Get credentials:
-   - Go to **Overview** and copy the **Application (client) ID**
-   - Go to **Certificates & secrets** > **Client secrets**
-   - Click **New client secret**
-   - Copy the secret value (you won't see it again!)
-
-4. Back in Firebase Console:
-   - Click on **Microsoft** in Sign-in method
-   - Enable Microsoft sign-in
-   - Enter the **Application (client) ID** from Azure
-   - Enter the **Application secret** from Azure
-   - Click **Save**
 
 ## Step 3: Configure Firebase in Your App
 
@@ -145,7 +115,6 @@ npm start
 3. Test each authentication method:
    - Email/password signup and signin
    - Google sign-in
-   - Microsoft sign-in
    - Password reset
 
 ## Step 9: Optional - Set Up Firebase Emulators (Development)
@@ -180,12 +149,7 @@ REACT_APP_USE_FIREBASE_EMULATORS=true
 2. **"auth/popup-blocked"**
    - Browser is blocking popups, ask user to allow popups
 
-3. **Microsoft sign-in not working**
-   - Check Azure AD app configuration
-   - Verify redirect URIs match exactly
-   - Ensure client secret is not expired
-
-4. **Email verification not sending**
+3. **Email verification not sending**
    - Check spam folder
    - Verify email templates in Firebase Console
    - Check Authentication > Templates
@@ -221,4 +185,4 @@ firebase deploy
 3. Use **Firebase Crashlytics** for error tracking
 4. Monitor authentication metrics in Firebase Console
 
-Your Firebase authentication is now fully configured with Google, Microsoft, and email/password providers!
+Your Firebase authentication is now fully configured with Google and email/password providers!

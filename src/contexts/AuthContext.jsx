@@ -10,7 +10,7 @@ import {
   sendEmailVerification,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
-import { auth, googleProvider, microsoftProvider, db } from '../config/firebase';
+import { auth, googleProvider, db } from '../config/firebase';
 import { getAuthErrorMessage } from '../utils/authErrors';
 
 /**
@@ -252,22 +252,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Microsoft sign in
-  const signInWithMicrosoft = async () => {
-    setLoading(true);
-    try {
-      const result = await signInWithPopup(auth, microsoftProvider);
-      await createUserProfile(result.user, { provider: 'microsoft' });
-      return { success: true, user: result.user };
-    } catch (error) {
-      console.error('Microsoft sign in failed:', error);
-      const errorMessage = getAuthErrorMessage(error.code);
-      return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Send email verification
   const sendVerificationEmail = async () => {
     if (!auth.currentUser) return { success: false, error: 'No user logged in' };
@@ -293,7 +277,6 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
     updateProfile,
     signInWithGoogle,
-    signInWithMicrosoft,
     sendVerificationEmail,
   };
 

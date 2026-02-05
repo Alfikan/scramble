@@ -3,7 +3,7 @@
  * Helper functions to test Firebase authentication setup
  */
 
-import { auth, googleProvider, microsoftProvider } from '../config/firebase';
+import { auth, googleProvider } from '../config/firebase';
 import { 
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -60,36 +60,6 @@ export const testGoogleAuth = () => {
 };
 
 /**
- * Test Microsoft authentication setup
- */
-export const testMicrosoftAuth = () => {
-  console.log('🧪 Testing Microsoft Authentication Setup...');
-  
-  try {
-    // Check if Microsoft provider is configured
-    if (!microsoftProvider) {
-      console.log('❌ Microsoft provider not configured');
-      return false;
-    }
-    
-    // Check provider ID
-    if (microsoftProvider.providerId !== 'microsoft.com') {
-      console.log('❌ Microsoft provider ID incorrect');
-      return false;
-    }
-    
-    console.log('✅ Microsoft provider configured correctly');
-    
-    // Note: We can't test the actual popup without user interaction
-    console.log('ℹ️  Microsoft sign-in popup requires user interaction to test');
-    return true;
-  } catch (error) {
-    console.log('❌ Microsoft auth setup error:', error);
-    return false;
-  }
-};
-
-/**
  * Test Firebase configuration
  */
 export const testFirebaseConfig = () => {
@@ -133,14 +103,12 @@ export const runAllAuthTests = async () => {
   const results = {
     config: testFirebaseConfig(),
     google: testGoogleAuth(),
-    microsoft: testMicrosoftAuth(),
     email: await testEmailAuth()
   };
   
   console.log('\n📊 Test Results:');
   console.log('Config:', results.config ? '✅' : '❌');
   console.log('Google:', results.google ? '✅' : '❌');
-  console.log('Microsoft:', results.microsoft ? '✅' : '❌');
   console.log('Email:', results.email ? '✅' : '❌');
   
   const allPassed = Object.values(results).every(result => result);

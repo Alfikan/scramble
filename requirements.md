@@ -50,7 +50,7 @@ Semantic Colors:
 - **Socket.io-client** for real-time features
 
 ### Backend & Services
-- **Firebase Authentication** (Email/Password, Google OAuth, Microsoft OAuth)
+- **Firebase Authentication** (Email/Password, Google OAuth)
 - **Cloud Firestore** for NoSQL database
 - **Cloud Storage** for media and file storage
 - **Cloud Functions** for serverless backend logic
@@ -74,7 +74,7 @@ Semantic Colors:
 **Priority**: Critical  
 **User Stories**:
 - As a student, I want to register with email/password so I can create an account
-- As a user, I want to sign in with Google/Microsoft so I can use existing credentials
+- As a user, I want to sign in with Google so I can use existing credentials
 - As a user, I want to set up my profile with avatar and study preferences
 - As a user, I want to reset my password if I forget it
 

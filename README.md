@@ -67,7 +67,7 @@ Scramble is a comprehensive collaborative study platform designed for Gen-Z stud
 - **React Hook Form + Yup** - Forms and validation
 
 ### Backend & Services
-- **Firebase Auth** - Authentication (Email, Google, Microsoft)
+- **Firebase Auth** - Authentication (Email, Google)
 - **Cloud Firestore** - NoSQL database
 - **Cloud Storage** - File and media storage
 - **Cloud Functions** - Serverless backend logic
