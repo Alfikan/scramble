@@ -1,24 +1,220 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 
+// Import pages (we'll create these next)
+import LandingPage from './pages/LandingPage';
+import AuthPage from './pages/AuthPage';
+import DashboardPage from './pages/DashboardPage';
+import PrivateSpacePage from './pages/PrivateSpacePage';
+import RoomsPage from './pages/RoomsPage';
+import RoomPage from './pages/RoomPage';
+
+// Import components
+import LoadingSpinner from './components/common/LoadingSpinner';
+import ErrorBoundary from './components/common/ErrorBoundary';
+
+// Import contexts and hooks
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+
+// Import styles
+import './index.css';
+
+// Create React Query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-cool-blue-gray">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return children;
+};
+
+// Public Route Component (redirect if authenticated)
+const PublicRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-cool-blue-gray">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
+
+// Page transition variants
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    x: -20,
+  },
+  in: {
+    opacity: 1,
+    x: 0,
+  },
+  out: {
+    opacity: 0,
+    x: 20,
+  },
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'anticipate',
+  duration: 0.3,
+};
+
+// Animated Route Wrapper
+const AnimatedRoute = ({ children }) => (
+  <motion.div
+    initial="initial"
+    animate="in"
+    exit="out"
+    variants={pageVariants}
+    transition={pageTransition}
+    className="w-full"
+  >
+    {children}
+  </motion.div>
+);
+
+// Main App Component
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <AuthProvider>
+            <Router>
+              <div className="App min-h-screen bg-cool-blue-gray font-kodchasan">
+                <AnimatePresence mode="wait">
+                  <Routes>
+                    {/* Public Routes */}
+                    <Route 
+                      path="/" 
+                      element={
+                        <PublicRoute>
+                          <AnimatedRoute>
+                            <LandingPage />
+                          </AnimatedRoute>
+                        </PublicRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/auth" 
+                      element={
+                        <PublicRoute>
+                          <AnimatedRoute>
+                            <AuthPage />
+                          </AnimatedRoute>
+                        </PublicRoute>
+                      } 
+                    />
+
+                    {/* Protected Routes */}
+                    <Route 
+                      path="/dashboard" 
+                      element={
+                        <ProtectedRoute>
+                          <AnimatedRoute>
+                            <DashboardPage />
+                          </AnimatedRoute>
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/private-space" 
+                      element={
+                        <ProtectedRoute>
+                          <AnimatedRoute>
+                            <PrivateSpacePage />
+                          </AnimatedRoute>
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/rooms" 
+                      element={
+                        <ProtectedRoute>
+                          <AnimatedRoute>
+                            <RoomsPage />
+                          </AnimatedRoute>
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/room/:roomId" 
+                      element={
+                        <ProtectedRoute>
+                          <AnimatedRoute>
+                            <RoomPage />
+                          </AnimatedRoute>
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    {/* Catch all route */}
+                    <Route 
+                      path="*" 
+                      element={
+                        <AnimatedRoute>
+                          <div className="min-h-screen flex items-center justify-center bg-cool-blue-gray">
+                            <div className="text-center">
+                              <h1 className="text-4xl font-bold text-primary-black mb-4">
+                                404 - Page Not Found
+                              </h1>
+                              <p className="text-muted-gray mb-8">
+                                The page you're looking for doesn't exist.
+                              </p>
+                              <button
+                                onClick={() => window.history.back()}
+                                className="btn-primary"
+                              >
+                                Go Back
+                              </button>
+                            </div>
+                          </div>
+                        </AnimatedRoute>
+                      } 
+                    />
+                  </Routes>
+                </AnimatePresence>
+              </div>
+            </Router>
+          </AuthProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

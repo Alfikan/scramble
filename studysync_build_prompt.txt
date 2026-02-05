@@ -1,0 +1,2500 @@
+================================================================================
+                    COLLABORATIVE STUDY PLATFORM - BUILD PROMPT
+                          AI Agent Coding Instructions
+================================================================================
+
+PROJECT NAME: Scramble
+
+PROJECT TYPE: Full-stack collaborative study platform web application
+TARGET USERS: Students, friends, and classmates who want to study together
+CORE CONCEPT: Room-based study collaboration similar to Google Classroom with dual modes (Private Space & Group Study)
+
+================================================================================
+                              TECH STACK
+================================================================================
+
+FRONTEND:
+- React 18+ with Hooks
+- React Router v6 (client-side routing)
+- Tailwind CSS (utility-first styling)
+- Framer Motion (animations)
+- React Hook Form + Yup (forms & validation)
+- React Query (data fetching & caching)
+- Socket.io-client (real-time features)
+- Recharts (data visualization)
+- Draft.js or Slate.js (rich text editor)
+- KaTeX (LaTeX math rendering)
+
+BACKEND:
+- Firebase Authentication (email/password, Google OAuth, Microsoft OAuth)
+- Cloud Firestore (NoSQL database)
+- Cloud Storage (media & file storage)
+- Cloud Functions (serverless backend logic)
+- Firebase Realtime Database (presence & online status)
+- Firebase Cloud Messaging (push notifications)
+
+THIRD-PARTY APIs:
+- Agora.io or Daily.co (video calling, screen sharing, recording)
+- OpenAI API or Google Gemini (AI quiz generation, doubt assistance)
+- Google Calendar API (schedule sync)
+
+================================================================================
+                            DESIGN SYSTEM
+================================================================================
+
+TYPOGRAPHY:
+Font Family: Kodchasan (Google Fonts)
+- Load weights: 300, 400, 500, 600, 700
+
+Usage:
+- Page Titles / Room Names: Kodchasan Bold (700), 28-32px
+- Section Headings: Kodchasan SemiBold (600), 20-24px
+- Body Text / Content: Kodchasan Medium (500), 15-16px
+- Secondary Text / Metadata: Kodchasan Regular (400), 13-14px
+- Small Labels / Captions: Kodchasan Light (300), 11-12px
+
+COLOR PALETTE:
+Primary Colors:
+- Deep Black: #151313 (sidebar, primary text, headers)
+- Vibrant Orange: #ff5734 (CTAs, active states, notifications)
+- Soft Purple: #be94f5 (group study mode, quizzes)
+- Warm Yellow: #fccc42 (private mode, achievements, timers)
+- Light Cream: #f7f7f5 (card backgrounds, input fields)
+- Cool Blue-Gray: #d4e4e8 (main background)
+
+Semantic Colors:
+- Success Green: #4caf50 (completed tasks, correct answers)
+- Warning Red: #f44336 (deadlines, errors, incorrect answers)
+- Info Blue: #2196f3 (notifications, informational messages, links)
+- Muted Gray: #9e9e9e (disabled states, placeholders)
+
+Feature-Specific Color Mapping:
+- Private Space features: Yellow (#fccc42) accents
+- Group Study features: Purple (#be94f5) accents
+- Study Timer: Yellow with orange progress
+- Quizzes: Purple cards with orange buttons
+- Doubts (Open): Orange badges
+- Doubts (Resolved): Green badges
+- Active Meetings: Blue (#2196f3)
+
+DESIGN PRINCIPLES:
+- Card-based UI with rounded corners (24px radius)
+- Generous white space and padding (24-32px inside cards)
+- Soft shadows on cards: box-shadow: 0 2px 8px rgba(0,0,0,0.08)
+- Hover effects: transform: translateY(-4px) with deeper shadow
+- Button border-radius: 20px
+- Input border-radius: 12px
+- Pills/Tags border-radius: 20px
+- Smooth transitions: transition: all 0.3s ease
+
+================================================================================
+                        CORE FEATURES TO IMPLEMENT
+================================================================================
+
+1. AUTHENTICATION & USER MANAGEMENT
+   ✓ Login page (email/password)
+   ✓ Registration page with email verification
+   ✓ Google OAuth integration
+   ✓ Microsoft OAuth integration
+   ✓ Password reset flow
+   ✓ User profile setup (avatar upload, display name, subjects, study preferences)
+   ✓ Profile editing
+   ✓ User settings page (notifications, privacy, theme)
+
+2. ROOM SYSTEM
+   ✓ Room creation form (admin)
+     - Room name, description
+     - Subject/category selection (dropdown with color coding)
+     - Auto-generated 6-digit room code
+     - Member limit (5-50, slider input)
+     - Privacy settings (Public, Private, Restricted)
+   ✓ Room joining interface
+     - Join by 6-digit code input
+     - Browse public rooms (grid of cards)
+     - Room preview before joining
+   ✓ Room dashboard
+     - Header with room name, code, member count
+     - Quick stats cards (active members, total study time, quizzes completed)
+     - Tabbed navigation:
+       * Overview (announcements, upcoming sessions)
+       * Chat (group messaging)
+       * Resources (shared files & links)
+       * Tasks (group to-do list)
+       * Quizzes (take & create quizzes)
+       * Study Sessions (scheduled & active)
+       * Leaderboard
+       * Settings (admin only)
+   ✓ Room members list with roles (admin, member)
+   ✓ Remove member (admin only)
+   ✓ Leave room functionality
+   ✓ Room code regeneration (admin only)
+
+3. PRIVATE SPACE
+   ✓ My Subjects page
+     - Subject cards (grid layout)
+     - Each card shows: subject name, emoji/icon, progress bar, study time, next exam countdown
+     - Quick actions: Start Timer, Take Quiz, View Notes
+     - Add/Edit/Delete subjects
+   ✓ Study Timer
+     - Large circular timer display (yellow accent)
+     - Presets: Pomodoro (25min work, 5min break), Deep Focus (50min, 10min break), Custom
+     - Subject selection for timer session
+     - Background music/ambience player (optional)
+     - Start/Pause/Stop controls
+     - Auto-save study session to Firestore
+     - Daily streak counter
+   ✓ Personal To-Do List
+     - Add task form (title, subject, priority, due date)
+     - Task cards with checkbox, title, priority flag, due date badge, subject tag
+     - Mark complete/incomplete
+     - Edit/Delete tasks
+     - Filter: All, Today, This Week, Overdue
+     - Sort by date, priority, subject
+   ✓ Personal Exam Preparation
+     - Add exam form (name, subject, date & time)
+     - Exam cards with countdown timer
+     - Preparation checklist for each exam
+     - Link resources to exams
+     - Practice test tracking
+     - Auto-generated study schedule based on exam date
+
+4. GROUP STUDY FEATURES
+   ✓ Active Study Rooms view
+     - List of joined rooms
+     - Live indicator for active members online
+     - Current activity display ("3 members studying now")
+     - Quick join session button
+   ✓ Quiz Sprint (Competitive Group Quizzes)
+     - Create Quiz Sprint form:
+       * Topic/Subject input
+       * Number of questions (5-50 slider)
+       * Time limit per question (10s-60s)
+       * Difficulty (Easy/Medium/Hard)
+       * Start immediately or schedule
+     - AI-generated questions (OpenAI/Gemini API integration)
+     - Real-time multiplayer quiz interface:
+       * Question display with countdown timer
+       * Multiple choice options (A/B/C/D buttons)
+       * Live leaderboard sidebar (updates in real-time)
+       * Participant avatars with current scores
+     - Post-quiz results page:
+       * Final score and percentage
+       * Rank/position
+       * Correct/Incorrect breakdown
+       * Question-by-question review with explanations
+       * Retake option
+       * Share score to room chat
+   ✓ Group Exam Preparation
+     - Shared exam calendar for room
+     - Coordinate study schedules
+     - Shared resource pool (notes, practice questions, videos)
+     - Schedule group study sessions
+     - Mock tests together
+   ✓ Leaderboards
+     - Overall room ranking (study time + quiz scores algorithm)
+     - Weekly top performers
+     - Quiz sprint champions
+     - Subject-wise leaders
+     - Consistency awards (study streaks)
+     - Podium display for top 3 (gold/silver/bronze)
+     - User's rank highlighted
+     - Filter: This Week, This Month, All Time
+
+5. DOUBT RAISE SYSTEM (Ticket-based Help)
+   ✓ Create Doubt form
+     - Subject selection dropdown
+     - Doubt title (required)
+     - Rich text description (with formatting toolbar)
+     - Attach images/files (drag & drop)
+     - Priority level (Low/Medium/High)
+     - Tags for categorization
+     - Visibility: room members or specific person
+   ✓ Doubt Card (list view)
+     - Status badge (Open/In Progress/Resolved) with color coding
+     - Priority indicator (colored flag)
+     - Title & preview of description
+     - Raised by (avatar + name)
+     - Timestamp (relative time)
+     - Comment count
+     - Attachments indicator
+     - Click to view details
+   ✓ Doubt Detail Page
+     - Full description with rich text formatting
+     - Attached media gallery
+     - Threaded comment system:
+       * Add comment with rich text
+       * Reply to comments
+       * Code snippet formatting (syntax highlighting)
+       * LaTeX math support (KaTeX rendering)
+       * Upvote helpful comments
+       * Mark best answer (green highlight)
+     - Resolve doubt button (changes status)
+     - Subscribe to notifications
+   ✓ Doubt Dashboard
+     - Tabs: My Doubts, Helping Others, Resolved
+     - Filter by subject, priority, room
+     - Search functionality
+
+6. CHAT SYSTEM
+   ✓ Group Chat (Room-based)
+     - Left sidebar: active rooms list
+     - Main panel: message thread with infinite scroll
+     - Right sidebar: room members online list (collapsible)
+     - Message input with rich text toolbar
+     - Send text messages
+     - @mentions with autocomplete (triggers notification)
+     - Reply/Thread to specific messages
+     - Emoji reactions on messages
+     - File sharing (drag & drop, max 10MB)
+     - Image preview inline
+     - Link previews (auto-fetch metadata)
+     - Code snippets with syntax highlighting
+     - LaTeX math rendering
+     - Pin important messages (admin only)
+     - Message search functionality
+     - Typing indicators ("User is typing...")
+     - Read receipts (seen by X members)
+   ✓ Personal Chat (Direct Messages)
+     - One-on-one conversations
+     - All group chat features available
+     - Initiate video/voice call from chat
+     - End-to-end encryption indicator
+     - Online/Offline status dots
+     - Last seen timestamp
+     - Unread message count badges
+
+7. VIDEO MEETINGS (Agora.io/Daily.co Integration)
+   ✓ Pre-join Lobby
+     - Camera/Mic preview and test
+     - Select input devices (camera, mic, speaker)
+     - Background blur toggle
+     - Virtual background option
+     - Display name confirmation
+     - Join Meeting button
+   ✓ Meeting Interface
+     - Video grid view (auto-layout based on participant count)
+     - Speaker view (highlighted active speaker)
+     - Video tiles with participant names
+     - Mute/unmute indicators on tiles
+     - Pin participant to main view
+     - Spotlight specific participant
+   ✓ Control Bar (bottom)
+     - Mic toggle with visual indicator (red when muted)
+     - Camera toggle (show/hide video)
+     - Screen share button
+       * Full screen or specific window selection
+       * Annotation tools overlay
+       * Laser pointer
+       * Pause/Resume sharing
+     - Whiteboard (collaborative canvas with drawing tools)
+     - Chat sidebar toggle
+     - Participants list panel
+     - Reactions (👍 👏 ❤️ 😂 quick emojis)
+     - Settings (change devices, quality)
+     - Record meeting (admin only, save to cloud)
+     - Leave/End meeting button (red, confirmation dialog)
+   ✓ Meeting Scheduling
+     - Create scheduled meeting form:
+       * Meeting title
+       * Date & time picker
+       * Duration estimate
+       * Repeat options (one-time, daily, weekly)
+       * Select room
+       * Invite specific members (multi-select)
+       * Agenda (optional rich text)
+       * Attach resources
+       * Reminder notifications (15min, 1hr, 1day before)
+     - Calendar view (monthly/weekly/daily)
+     - Upcoming meetings list
+     - Join button appears 5 minutes before scheduled time
+     - Auto-send reminders via notifications
+
+8. LINKS & MEDIA SHARING
+   ✓ Resource Library (per room)
+     - Upload interface:
+       * Drag & drop file area
+       * File browser button
+       * URL input for external links
+     - Organize by folders (user-created categories)
+     - Tag resources (subject tags)
+     - Filter by file type, date, uploader
+     - Search resources
+   ✓ Resource Cards
+     - Thumbnail preview (images/videos/PDFs)
+     - File name and type icon
+     - Uploaded by (avatar + name)
+     - Upload timestamp
+     - File size display
+     - Download button
+     - View/Open button (inline preview for images/videos)
+     - Comment section on resources
+     - Reactions (like, helpful)
+     - Share to chat button
+   ✓ Supported File Types
+     - Documents: PDF, DOCX, PPTX, TXT, MD
+     - Images: JPG, PNG, GIF, WebP
+     - Videos: MP4, WebM (max 100MB, consider compression)
+     - Links: Auto-preview (YouTube embeds, article metadata)
+     - Archives: ZIP (with security scan)
+   ✓ Personal Media Vault
+     - Private file storage for user
+     - Same upload/organization features
+     - Quick share to any joined room
+
+9. AI-POWERED QUIZ GENERATION
+   ✓ Quiz Generator Form
+     - Topic input (text field or file upload for context)
+     - Number of questions (5-50 slider)
+     - Question types (checkboxes):
+       * Multiple Choice (MCQ)
+       * True/False
+       * Fill in the blanks
+       * Short answer
+     - Difficulty level (Easy/Medium/Hard radio buttons)
+     - Time limit toggle (on/off) with duration input
+     - Generate Quiz button
+   ✓ AI Processing (OpenAI/Gemini API)
+     - Send topic/context to AI API
+     - Prompt engineering for quality questions:
+       * Request contextually relevant questions
+       * Generate plausible distractors for MCQs
+       * Include explanations for answers
+     - Parse API response into structured quiz data
+     - Save quiz to Firestore
+   ✓ Quiz Taking Interface
+     - Clean, focused question display (one at a time)
+     - Progress bar (Question X of Y)
+     - Timer (if enabled, orange countdown with visual warning at 10s)
+     - Option selection buttons (highlight on hover, mark selected)
+     - Flag question for review (bookmark icon)
+     - Navigation: Previous, Next, Submit buttons
+     - Auto-save progress to Firestore (resume capability)
+     - Confirmation dialog on submit
+   ✓ Results Page
+     - Large score badge (percentage with color: green >80%, yellow 60-79%, red <60%)
+     - Grade letter (A, B, C, D, F)
+     - Time taken vs allocated
+     - Correct/Incorrect count with visual pie chart
+     - Question-by-question review section:
+       * Question text
+       * Your answer (red if wrong, green if correct)
+       * Correct answer (if you got it wrong)
+       * AI-generated explanation
+       * Mark for future practice (save to personal quiz bank)
+     - Retake Quiz button
+     - Share Score to Room Chat button
+     - Download Report as PDF
+
+10. ANALYTICS & INSIGHTS
+    ✓ Personal Analytics Dashboard
+      - Study Time Overview:
+        * Total hours studied (this week/month)
+        * Bar chart (daily study time for last 7/30 days)
+        * Subject-wise breakdown (pie chart)
+        * Peak productivity hours (heatmap, hour of day vs day of week)
+        * Study streak calendar (GitHub-style contribution graph)
+      - Quiz Performance:
+        * Average score by subject (bar chart)
+        * Score improvement trend (line graph over time)
+        * Weak topics identification (topics with <70% score highlighted)
+        * Total quizzes taken count
+      - Task Management:
+        * Task completion rate (percentage)
+        * Overdue tasks count (red badge)
+        * Tasks completed this week
+      - Meeting Participation:
+        * Total meeting hours
+        * Meetings attended vs missed
+      - Doubt Activity:
+        * Doubts raised count
+        * Doubts resolved count
+        * Helpful answers given (upvoted comments count)
+    ✓ Room Analytics (Admin View)
+      - Member activity levels (list with color-coded engagement scores)
+      - Total collective study hours (all members combined)
+      - Quiz participation rates (percentage of members)
+      - Resource upload frequency (chart over time)
+      - Chat activity timeline (messages per day)
+      - Member growth chart (new joins over time)
+      - Most active members leaderboard
+
+================================================================================
+                    ADDITIONAL INNOVATIVE FEATURES
+================================================================================
+
+11. STUDY BUDDY MATCHING (AI-based)
+    ✓ Matching Algorithm:
+      - Compare user profiles:
+        * Similar subjects
+        * Compatible study time availability
+        * Complementary strengths/weaknesses (good at different subjects)
+        * Study style preferences (visual/auditory/kinesthetic)
+      - Generate match score (0-100%)
+    ✓ Study Buddy Suggestions page
+      - List of suggested buddies (cards with match percentage)
+      - Send buddy request button
+      - Accept/Decline incoming requests
+    ✓ Buddy Features:
+      - Schedule shared study sessions
+      - Shared to-do list
+      - Quick call button
+
+12. FOCUS MODE
+    ✓ Activate Focus Mode button (on dashboard)
+    ✓ Full-screen distraction-free interface:
+      - Large timer in center
+      - Current task display
+      - Ambient sounds player (rain, cafe, white noise)
+      - Virtual study room (see online buddies, minimal UI)
+      - Block all notifications except urgent (admin announcements, meeting starts)
+    ✓ Exit Focus Mode button (ESC key or button)
+
+13. GAMIFICATION SYSTEM
+    ✓ Badges & Achievements:
+      - Study Streaks: 7-day, 30-day, 100-day streak badges
+      - Quiz Master: Score 100% on any quiz, score 90%+ on 10 quizzes
+      - Helpful Peer: Resolve 5, 25, 100 doubts
+      - Attendance Champion: Attend 10, 50 meetings
+      - Early Bird: Complete 10 study sessions before 8 AM
+      - Night Owl: Complete 10 study sessions after 10 PM
+    ✓ XP Points System:
+      - Earn XP for: studying (1 XP per 10 minutes), completing tasks, quiz scores, helping with doubts, attending meetings
+      - Display total XP and current level
+    ✓ Level Progression:
+      - Level up every 1000 XP
+      - Show level badge on profile
+    ✓ Unlockables:
+      - Unlock new themes at levels 5, 10, 20
+      - Unlock custom avatars/borders
+      - Unlock special badges
+
+14. SMART NOTIFICATIONS
+    ✓ Notification Preferences (in settings):
+      - Toggle notifications by category (meetings, doubts, chat, tasks, quizzes)
+      - Priority levels: Urgent (always notify), Important (notify unless DND), Low (digest only)
+      - Digest mode (daily summary email)
+      - Do Not Disturb schedule (set quiet hours)
+    ✓ Notification Center (bell icon in header):
+      - List of recent notifications
+      - Unread count badge
+      - Mark as read/unread
+      - Quick actions from notification (join meeting, reply to chat, etc.)
+    ✓ Push Notifications (Firebase Cloud Messaging):
+      - Browser push notifications
+      - Notification types:
+        * Meeting starting in 5 minutes (urgent)
+        * Doubt answered (important)
+        * New message with @mention (important)
+        * Task due tomorrow (important)
+        * New resource shared (low)
+        * Quiz invitation (low)
+
+15. STUDY PLANNER
+    ✓ Weekly Planner View (drag & drop interface):
+      - 7-day grid (columns) with hourly slots (rows)
+      - Drag study blocks onto calendar
+      - Color-code by subject
+      - Add tasks, quizzes, meetings from calendar
+    ✓ Auto-Schedule Feature (AI-powered):
+      - Inputs: exam dates, task deadlines, available hours, subject priorities
+      - Algorithm: distribute study time optimally
+      - Generate suggested schedule
+      - User can accept/modify
+    ✓ Calendar Integration:
+      - Import from Google Calendar (via Google Calendar API)
+      - Export study schedule to Google Calendar
+      - Two-way sync toggle
+
+16. COLLABORATIVE NOTES
+    ✓ Notes Editor (per room):
+      - Rich text editor with Markdown support
+      - Real-time collaboration (multiple users editing simultaneously)
+      - User cursors with name labels
+      - Drawing/diagram tools (basic shapes, arrows, text boxes)
+      - Organize notes by subject/topic folders
+      - Version history (see past edits, restore)
+      - Comment on specific sections
+      - Export to PDF/Markdown
+      - Share note snippet to chat
+    ✓ Personal Notes (private):
+      - Same editor features
+      - Quick share to any room
+
+17. OFFLINE MODE (Progressive Web App)
+    ✓ Service Worker setup:
+      - Cache static assets (HTML, CSS, JS, fonts, icons)
+      - Cache dynamic data (user profile, recent chats, resources)
+    ✓ Offline Functionality:
+      - Download resources for offline viewing
+      - Take quizzes offline (sync score when online)
+      - Study timer works offline (sync session when online)
+      - View cached chat messages
+      - Show "Offline" indicator in UI
+    ✓ Sync when back online:
+      - Queue offline actions (messages, task updates, timer sessions)
+      - Sync to Firestore when connection restored
+      - Show sync status in UI
+
+================================================================================
+                        DATABASE STRUCTURE (FIRESTORE)
+================================================================================
+
+COLLECTION: users
+  DOCUMENT: {userId}
+    FIELDS:
+      - displayName: string
+      - email: string
+      - avatar: string (Storage URL)
+      - bio: string (optional)
+      - subjects: array of strings
+      - studyPreferences: object
+          * focusMusic: boolean
+          * pomodoroLength: number (minutes)
+          * breakLength: number (minutes)
+          * studyGoalHoursPerWeek: number
+      - availability: object
+          * monday: array [startHour, endHour]
+          * tuesday: array [startHour, endHour]
+          * ... (for each day of week)
+      - stats: object
+          * totalStudyHours: number
+          * totalQuizzesTaken: number
+          * averageQuizScore: number
+          * doubtsRaised: number
+          * doubtsResolved: number
+          * meetingsAttended: number
+          * currentStreak: number
+          * longestStreak: number
+          * xp: number
+          * level: number
+      - badges: array of strings (badge IDs)
+      - joinedRooms: array of room IDs
+      - createdAt: timestamp
+      - lastActive: timestamp
+
+COLLECTION: rooms
+  DOCUMENT: {roomId}
+    FIELDS:
+      - name: string
+      - description: string
+      - code: string (6-digit unique code)
+      - subject: string
+      - adminId: string (user ID of creator)
+      - members: array of user IDs
+      - memberLimit: number (5-50)
+      - privacy: string ("public", "private", "restricted")
+      - settings: object
+          * allowMemberInvites: boolean
+          * autoArchiveInactiveDays: number
+          * defaultTimerMinutes: number
+      - stats: object
+          * totalStudyHours: number
+          * totalQuizzes: number
+          * totalResources: number
+          * totalMeetings: number
+      - createdAt: timestamp
+      - lastActivity: timestamp
+
+  SUBCOLLECTION: messages
+    DOCUMENT: {messageId}
+      FIELDS:
+        - senderId: string (user ID)
+        - senderName: string
+        - senderAvatar: string
+        - content: string
+        - type: string ("text", "file", "image", "system", "poll")
+        - attachments: array of objects
+            * name: string
+            * url: string (Storage URL)
+            * type: string (file type)
+            * size: number (bytes)
+        - replyTo: string (message ID, optional)
+        - reactions: object (emoji: array of user IDs)
+        - mentions: array of user IDs
+        - isPinned: boolean
+        - timestamp: timestamp
+        - editedAt: timestamp (optional)
+
+  SUBCOLLECTION: resources
+    DOCUMENT: {resourceId}
+      FIELDS:
+        - name: string
+        - type: string ("pdf", "image", "video", "link", "doc")
+        - url: string (Storage URL or external link)
+        - uploadedBy: string (user ID)
+        - uploadedByName: string
+        - size: number (bytes, if file)
+        - folderId: string (category folder, optional)
+        - tags: array of strings
+        - description: string (optional)
+        - comments: array of objects
+            * userId: string
+            * userName: string
+            * comment: string
+            * timestamp: timestamp
+        - reactions: object (type: count)
+        - uploadedAt: timestamp
+
+  SUBCOLLECTION: tasks
+    DOCUMENT: {taskId}
+      FIELDS:
+        - title: string
+        - description: string (optional)
+        - createdBy: string (user ID)
+        - assignedTo: array of user IDs (for group tasks)
+        - priority: string ("low", "medium", "high")
+        - dueDate: timestamp
+        - subject: string (optional)
+        - completed: boolean
+        - completedBy: string (user ID, optional)
+        - completedAt: timestamp (optional)
+        - createdAt: timestamp
+
+COLLECTION: doubts
+  DOCUMENT: {doubtId}
+    FIELDS:
+      - title: string
+      - description: string (rich text HTML)
+      - raisedBy: string (user ID)
+      - raisedByName: string
+      - raisedByAvatar: string
+      - roomId: string
+      - roomName: string
+      - subject: string
+      - priority: string ("low", "medium", "high")
+      - status: string ("open", "in_progress", "resolved")
+      - tags: array of strings
+      - attachments: array of objects
+          * name: string
+          * url: string
+          * type: string
+      - visibility: string ("room", "specific") - if specific, visibleTo array
+      - visibleTo: array of user IDs (optional)
+      - resolvedBy: string (user ID, optional)
+      - bestAnswerId: string (comment ID, optional)
+      - upvotes: number
+      - createdAt: timestamp
+      - updatedAt: timestamp
+      - resolvedAt: timestamp (optional)
+
+  SUBCOLLECTION: comments
+    DOCUMENT: {commentId}
+      FIELDS:
+        - userId: string
+        - userName: string
+        - userAvatar: string
+        - content: string (rich text HTML, supports code, LaTeX)
+        - replyTo: string (comment ID for threaded replies, optional)
+        - upvotes: array of user IDs
+        - timestamp: timestamp
+        - editedAt: timestamp (optional)
+
+COLLECTION: quizzes
+  DOCUMENT: {quizId}
+    FIELDS:
+      - title: string
+      - topic: string
+      - description: string (optional)
+      - createdBy: string (user ID)
+      - roomId: string (if group quiz, null for personal)
+      - type: string ("personal", "group", "sprint")
+      - difficulty: string ("easy", "medium", "hard")
+      - timeLimit: number (seconds per question, 0 for no limit)
+      - questions: array of objects
+          * questionText: string
+          * questionType: string ("mcq", "true_false", "fill_blank", "short_answer")
+          * options: array of strings (for mcq)
+          * correctAnswer: string or number (option index for mcq)
+          * explanation: string
+          * points: number (default 1)
+      - totalQuestions: number
+      - totalPoints: number
+      - participants: array of objects (for group quizzes)
+          * userId: string
+          * userName: string
+          * score: number
+          * completedAt: timestamp
+      - scheduledAt: timestamp (optional)
+      - isActive: boolean
+      - createdAt: timestamp
+
+COLLECTION: quizResults
+  DOCUMENT: {resultId}
+    FIELDS:
+      - quizId: string
+      - userId: string
+      - userName: string
+      - userAvatar: string
+      - roomId: string (optional)
+      - score: number
+      - totalPoints: number
+      - percentage: number
+      - timeTaken: number (seconds)
+      - answers: array of objects
+          * questionId: number (index)
+          * userAnswer: string
+          * isCorrect: boolean
+          * pointsEarned: number
+      - completedAt: timestamp
+
+COLLECTION: studySessions
+  DOCUMENT: {sessionId}
+    FIELDS:
+      - userId: string
+      - subject: string
+      - duration: number (minutes)
+      - sessionType: string ("pomodoro", "deep_focus", "custom")
+      - startTime: timestamp
+      - endTime: timestamp
+      - completed: boolean (false if interrupted)
+      - focusModeEnabled: boolean
+      - ambientSound: string (optional)
+
+COLLECTION: meetings
+  DOCUMENT: {meetingId}
+    FIELDS:
+      - title: string
+      - roomId: string
+      - createdBy: string (user ID)
+      - scheduledTime: timestamp
+      - duration: number (minutes)
+      - agenda: string (optional)
+      - participants: array of user IDs (invited)
+      - attendees: array of objects (who actually joined)
+          * userId: string
+          * joinedAt: timestamp
+          * leftAt: timestamp
+      - resources: array of resource IDs (attached files)
+      - recordingUrl: string (Storage URL, optional)
+      - isRecurring: boolean
+      - recurrencePattern: string ("daily", "weekly", null)
+      - meetingLink: string (Agora/Daily.co room link)
+      - status: string ("scheduled", "ongoing", "ended", "cancelled")
+      - reminders: array of timestamps (when to send notifications)
+      - createdAt: timestamp
+
+COLLECTION: personalTodos
+  DOCUMENT: {todoId}
+    FIELDS:
+      - userId: string
+      - title: string
+      - description: string (optional)
+      - priority: string ("low", "medium", "high")
+      - dueDate: timestamp
+      - subject: string (optional)
+      - completed: boolean
+      - completedAt: timestamp (optional)
+      - createdAt: timestamp
+
+COLLECTION: exams
+  DOCUMENT: {examId}
+    FIELDS:
+      - userId: string (for personal exams)
+      - roomId: string (for group exams, optional)
+      - name: string
+      - subject: string
+      - examDate: timestamp
+      - examTime: string (e.g., "10:00 AM")
+      - checklist: array of objects
+          * task: string
+          * completed: boolean
+      - linkedResources: array of resource IDs
+      - practiceTestScores: array of objects
+          * quizId: string
+          * score: number
+          * date: timestamp
+      - createdAt: timestamp
+
+COLLECTION: notifications
+  DOCUMENT: {notificationId}
+    FIELDS:
+      - userId: string
+      - type: string ("meeting", "doubt", "chat", "task", "quiz", "system")
+      - priority: string ("urgent", "important", "low")
+      - title: string
+      - message: string
+      - actionUrl: string (link to relevant page)
+      - actionData: object (e.g., roomId, doubtId)
+      - isRead: boolean
+      - createdAt: timestamp
+
+COLLECTION: notes
+  DOCUMENT: {noteId}
+    FIELDS:
+      - title: string
+      - content: string (rich text / Markdown)
+      - ownerId: string (user ID)
+      - roomId: string (if shared, null for personal)
+      - subject: string
+      - isPublic: boolean (within room)
+      - collaborators: array of user IDs (for real-time editing)
+      - versionHistory: array of objects
+          * content: string
+          * editedBy: string (user ID)
+          * timestamp: timestamp
+      - createdAt: timestamp
+      - updatedAt: timestamp
+
+================================================================================
+                    FIRESTORE SECURITY RULES (IMPORTANT!)
+================================================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isRoomMember(roomId) {
+      return request.auth.uid in get(/databases/$(database)/documents/rooms/$(roomId)).data.members;
+    }
+    
+    function isRoomAdmin(roomId) {
+      return request.auth.uid == get(/databases/$(database)/documents/rooms/$(roomId)).data.adminId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+    }
+    
+    // Rooms collection
+    match /rooms/{roomId} {
+      allow read: if isSignedIn() && (
+        resource.data.privacy == "public" || 
+        isRoomMember(roomId)
+      );
+      allow create: if isSignedIn();
+      allow update: if isRoomAdmin(roomId);
+      allow delete: if isRoomAdmin(roomId);
+      
+      // Messages subcollection
+      match /messages/{messageId} {
+        allow read: if isRoomMember(roomId);
+        allow create: if isRoomMember(roomId);
+        allow update: if isRoomMember(roomId) && (
+          request.auth.uid == resource.data.senderId || 
+          isRoomAdmin(roomId)
+        );
+        allow delete: if isRoomAdmin(roomId);
+      }
+      
+      // Resources subcollection
+      match /resources/{resourceId} {
+        allow read: if isRoomMember(roomId);
+        allow create: if isRoomMember(roomId);
+        allow update: if isRoomMember(roomId);
+        allow delete: if isRoomMember(roomId) && (
+          request.auth.uid == resource.data.uploadedBy || 
+          isRoomAdmin(roomId)
+        );
+      }
+      
+      // Tasks subcollection
+      match /tasks/{taskId} {
+        allow read: if isRoomMember(roomId);
+        allow create: if isRoomMember(roomId);
+        allow update: if isRoomMember(roomId);
+        allow delete: if isRoomAdmin(roomId);
+      }
+    }
+    
+    // Doubts collection
+    match /doubts/{doubtId} {
+      allow read: if isSignedIn() && (
+        isRoomMember(resource.data.roomId) ||
+        request.auth.uid in resource.data.visibleTo
+      );
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isOwner(resource.data.raisedBy);
+      
+      // Comments subcollection
+      match /comments/{commentId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        allow update: if isOwner(resource.data.userId);
+        allow delete: if isOwner(resource.data.userId);
+      }
+    }
+    
+    // Quizzes collection
+    match /quizzes/{quizId} {
+      allow read: if isSignedIn() && (
+        resource.data.roomId == null || 
+        isRoomMember(resource.data.roomId)
+      );
+      allow create: if isSignedIn();
+      allow update: if isOwner(resource.data.createdBy);
+      allow delete: if isOwner(resource.data.createdBy);
+    }
+    
+    // Quiz Results collection
+    match /quizResults/{resultId} {
+      allow read: if isSignedIn() && (
+        isOwner(resource.data.userId) || 
+        isRoomMember(resource.data.roomId)
+      );
+      allow create: if isSignedIn();
+      allow update: if false; // Results are immutable
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    // Study Sessions collection
+    match /studySessions/{sessionId} {
+      allow read: if isOwner(resource.data.userId);
+      allow create: if isSignedIn();
+      allow update: if isOwner(resource.data.userId);
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    // Meetings collection
+    match /meetings/{meetingId} {
+      allow read: if isSignedIn() && (
+        request.auth.uid in resource.data.participants ||
+        isRoomMember(resource.data.roomId)
+      );
+      allow create: if isSignedIn();
+      allow update: if isOwner(resource.data.createdBy);
+      allow delete: if isOwner(resource.data.createdBy);
+    }
+    
+    // Personal Todos collection
+    match /personalTodos/{todoId} {
+      allow read: if isOwner(resource.data.userId);
+      allow create: if isSignedIn();
+      allow update: if isOwner(resource.data.userId);
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    // Exams collection
+    match /exams/{examId} {
+      allow read: if isSignedIn() && (
+        isOwner(resource.data.userId) || 
+        (resource.data.roomId != null && isRoomMember(resource.data.roomId))
+      );
+      allow create: if isSignedIn();
+      allow update: if isOwner(resource.data.userId);
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read: if isOwner(resource.data.userId);
+      allow create: if true; // System can create notifications
+      allow update: if isOwner(resource.data.userId); // Only to mark as read
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    // Notes collection
+    match /notes/{noteId} {
+      allow read: if isSignedIn() && (
+        isOwner(resource.data.ownerId) ||
+        (resource.data.isPublic && isRoomMember(resource.data.roomId)) ||
+        request.auth.uid in resource.data.collaborators
+      );
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (
+        isOwner(resource.data.ownerId) ||
+        request.auth.uid in resource.data.collaborators
+      );
+      allow delete: if isOwner(resource.data.ownerId);
+    }
+  }
+}
+
+================================================================================
+                      CLOUD STORAGE SECURITY RULES
+================================================================================
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // User avatars
+    match /users/{userId}/avatar.{ext} {
+      allow read: if request.auth != null;
+      allow write: if request.auth.uid == userId 
+                   && request.resource.size < 5 * 1024 * 1024  // 5MB max
+                   && request.resource.contentType.matches('image/.*');
+    }
+    
+    // User private files
+    match /users/{userId}/private/{allPaths=**} {
+      allow read: if request.auth.uid == userId;
+      allow write: if request.auth.uid == userId 
+                   && request.resource.size < 10 * 1024 * 1024; // 10MB max
+    }
+    
+    // Room resources
+    match /rooms/{roomId}/resources/{allPaths=**} {
+      allow read: if request.auth != null; // Check room membership in app logic
+      allow write: if request.auth != null 
+                   && request.resource.size < 100 * 1024 * 1024; // 100MB max
+    }
+    
+    // Meeting recordings
+    match /rooms/{roomId}/recordings/{recordingId} {
+      allow read: if request.auth != null; // Check room membership in app logic
+      allow write: if request.auth != null; // Admin check in app logic
+    }
+  }
+}
+
+================================================================================
+                      CLOUD FUNCTIONS (EXAMPLES)
+================================================================================
+
+// functions/index.js
+
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+admin.initializeApp();
+
+const db = admin.firestore();
+const fcm = admin.messaging();
+
+// 1. Generate unique room code on room creation
+exports.generateRoomCode = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'Must be signed in');
+  }
+  
+  // Generate random 6-digit alphanumeric code
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code;
+  let isUnique = false;
+  
+  while (!isUnique) {
+    code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    
+    // Check if code already exists
+    const snapshot = await db.collection('rooms').where('code', '==', code).get();
+    if (snapshot.empty) {
+      isUnique = true;
+    }
+  }
+  
+  return { code };
+});
+
+// 2. Send notification when doubt is answered
+exports.onDoubtCommentCreated = functions.firestore
+  .document('doubts/{doubtId}/comments/{commentId}')
+  .onCreate(async (snap, context) => {
+    const comment = snap.data();
+    const doubtId = context.params.doubtId;
+    
+    // Get doubt document
+    const doubtDoc = await db.collection('doubts').doc(doubtId).get();
+    const doubt = doubtDoc.data();
+    
+    // Don't notify if commenter is the doubt owner
+    if (comment.userId === doubt.raisedBy) {
+      return null;
+    }
+    
+    // Get doubt owner's details
+    const ownerDoc = await db.collection('users').doc(doubt.raisedBy).get();
+    const owner = ownerDoc.data();
+    
+    // Create notification
+    await db.collection('notifications').add({
+      userId: doubt.raisedBy,
+      type: 'doubt',
+      priority: 'important',
+      title: 'New answer to your doubt',
+      message: `${comment.userName} answered your doubt: "${doubt.title}"`,
+      actionUrl: `/doubts/${doubtId}`,
+      actionData: { doubtId },
+      isRead: false,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Send FCM push notification (if user has FCM token)
+    // Implementation depends on how you store FCM tokens
+    
+    return null;
+  });
+
+// 3. Update room stats when new message is sent
+exports.onRoomMessageCreated = functions.firestore
+  .document('rooms/{roomId}/messages/{messageId}')
+  .onCreate(async (snap, context) => {
+    const roomId = context.params.roomId;
+    
+    // Update room's lastActivity timestamp
+    await db.collection('rooms').doc(roomId).update({
+      lastActivity: admin.firestore.FieldValue.serverTimestamp()
+    });
+    
+    return null;
+  });
+
+// 4. Send meeting reminders (scheduled Cloud Function)
+exports.sendMeetingReminders = functions.pubsub
+  .schedule('every 5 minutes')
+  .onRun(async (context) => {
+    const now = admin.firestore.Timestamp.now();
+    const fifteenMinutesLater = new admin.firestore.Timestamp(
+      now.seconds + (15 * 60),
+      now.nanoseconds
+    );
+    
+    // Find meetings starting in the next 15 minutes that haven't sent 15-min reminder
+    const meetingsSnapshot = await db.collection('meetings')
+      .where('scheduledTime', '>', now)
+      .where('scheduledTime', '<=', fifteenMinutesLater)
+      .where('status', '==', 'scheduled')
+      .get();
+    
+    const batch = db.batch();
+    
+    for (const doc of meetingsSnapshot.docs) {
+      const meeting = doc.data();
+      
+      // Check if 15-minute reminder was already sent
+      const reminderSent = meeting.reminders && 
+                          meeting.reminders.some(r => r.toMillis() === fifteenMinutesLater.toMillis());
+      
+      if (!reminderSent) {
+        // Send notifications to all participants
+        for (const participantId of meeting.participants) {
+          const notificationRef = db.collection('notifications').doc();
+          batch.set(notificationRef, {
+            userId: participantId,
+            type: 'meeting',
+            priority: 'urgent',
+            title: 'Meeting starting soon',
+            message: `"${meeting.title}" starts in 15 minutes`,
+            actionUrl: `/meetings/${doc.id}`,
+            actionData: { meetingId: doc.id },
+            isRead: false,
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+          });
+        }
+        
+        // Mark reminder as sent
+        batch.update(doc.ref, {
+          reminders: admin.firestore.FieldValue.arrayUnion(fifteenMinutesLater)
+        });
+      }
+    }
+    
+    await batch.commit();
+    return null;
+  });
+
+// 5. Update user stats when study session completes
+exports.onStudySessionCompleted = functions.firestore
+  .document('studySessions/{sessionId}')
+  .onCreate(async (snap, context) => {
+    const session = snap.data();
+    
+    if (session.completed) {
+      const userRef = db.collection('users').doc(session.userId);
+      
+      await userRef.update({
+        'stats.totalStudyHours': admin.firestore.FieldValue.increment(session.duration / 60),
+        lastActive: admin.firestore.FieldValue.serverTimestamp()
+      });
+      
+      // Check and update study streak
+      // (Implementation would check if user studied yesterday and update streak accordingly)
+    }
+    
+    return null;
+  });
+
+// 6. Calculate and update leaderboard scores
+exports.updateLeaderboard = functions.pubsub
+  .schedule('every 1 hours')
+  .onRun(async (context) => {
+    const roomsSnapshot = await db.collection('rooms').get();
+    
+    for (const roomDoc of roomsSnapshot.docs) {
+      const roomId = roomDoc.id;
+      const members = roomDoc.data().members;
+      
+      const leaderboardData = [];
+      
+      for (const memberId of members) {
+        // Get user's study time in this room
+        const sessionsSnapshot = await db.collection('studySessions')
+          .where('userId', '==', memberId)
+          .get();
+        
+        let totalStudyMinutes = 0;
+        sessionsSnapshot.forEach(doc => {
+          totalStudyMinutes += doc.data().duration;
+        });
+        
+        // Get user's quiz scores in this room
+        const quizResultsSnapshot = await db.collection('quizResults')
+          .where('userId', '==', memberId)
+          .where('roomId', '==', roomId)
+          .get();
+        
+        let totalQuizScore = 0;
+        let quizCount = 0;
+        quizResultsSnapshot.forEach(doc => {
+          totalQuizScore += doc.data().percentage;
+          quizCount++;
+        });
+        
+        const avgQuizScore = quizCount > 0 ? totalQuizScore / quizCount : 0;
+        
+        // Calculate composite score (weighted: 60% study time, 40% quiz performance)
+        const studyScore = totalStudyMinutes / 60; // hours
+        const compositeScore = (studyScore * 0.6) + (avgQuizScore * 0.4);
+        
+        const userDoc = await db.collection('users').doc(memberId).get();
+        const user = userDoc.data();
+        
+        leaderboardData.push({
+          userId: memberId,
+          userName: user.displayName,
+          userAvatar: user.avatar,
+          studyHours: studyScore,
+          avgQuizScore: avgQuizScore,
+          compositeScore: compositeScore
+        });
+      }
+      
+      // Sort by composite score
+      leaderboardData.sort((a, b) => b.compositeScore - a.compositeScore);
+      
+      // Store leaderboard (create a new subcollection or field in room document)
+      await roomDoc.ref.update({
+        leaderboard: leaderboardData
+      });
+    }
+    
+    return null;
+  });
+
+================================================================================
+                    THIRD-PARTY API INTEGRATIONS
+================================================================================
+
+1. AGORA.IO VIDEO CALLING SETUP
+   
+   // Install Agora SDK
+   npm install agora-rtc-react
+   
+   // services/agoraService.js
+   import AgoraRTC from "agora-rtc-sdk-ng";
+   
+   const APP_ID = process.env.REACT_APP_AGORA_APP_ID;
+   
+   export const createAgoraClient = () => {
+     return AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+   };
+   
+   export const joinChannel = async (client, channel, token, uid) => {
+     await client.join(APP_ID, channel, token, uid);
+   };
+   
+   export const createLocalTracks = async () => {
+     const [audioTrack, videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
+     return { audioTrack, videoTrack };
+   };
+   
+   export const publishTracks = async (client, tracks) => {
+     await client.publish([tracks.audioTrack, tracks.videoTrack]);
+   };
+   
+   export const leaveChannel = async (client) => {
+     await client.leave();
+   };
+   
+   // Component usage
+   import { useEffect, useState } from 'react';
+   import { createAgoraClient, joinChannel, createLocalTracks } from '../services/agoraService';
+   
+   const MeetingRoom = ({ meetingId, channelName }) => {
+     const [client] = useState(createAgoraClient());
+     const [localTracks, setLocalTracks] = useState({ audioTrack: null, videoTrack: null });
+     const [remoteUsers, setRemoteUsers] = useState([]);
+     
+     useEffect(() => {
+       const init = async () => {
+         // Get token from your backend (Cloud Function)
+         const token = await fetchAgoraToken(channelName);
+         
+         // Join channel
+         await joinChannel(client, channelName, token, null);
+         
+         // Create local tracks
+         const tracks = await createLocalTracks();
+         setLocalTracks(tracks);
+         
+         // Play local video
+         tracks.videoTrack.play('local-player');
+         
+         // Publish tracks
+         await client.publish([tracks.audioTrack, tracks.videoTrack]);
+         
+         // Listen for remote users
+         client.on('user-published', async (user, mediaType) => {
+           await client.subscribe(user, mediaType);
+           if (mediaType === 'video') {
+             setRemoteUsers(prev => [...prev, user]);
+           }
+           if (mediaType === 'audio') {
+             user.audioTrack.play();
+           }
+         });
+       };
+       
+       init();
+       
+       return () => {
+         localTracks.audioTrack?.close();
+         localTracks.videoTrack?.close();
+         client.leave();
+       };
+     }, []);
+     
+     return (
+       <div className="meeting-room">
+         <div id="local-player" className="video-tile"></div>
+         {remoteUsers.map(user => (
+           <div key={user.uid} id={`remote-player-${user.uid}`} className="video-tile"></div>
+         ))}
+       </div>
+     );
+   };
+
+2. OPENAI API FOR QUIZ GENERATION
+   
+   // Install OpenAI SDK
+   npm install openai
+   
+   // Cloud Function: functions/generateQuiz.js
+   const functions = require('firebase-functions');
+   const { Configuration, OpenAIApi } = require('openai');
+   
+   const configuration = new Configuration({
+     apiKey: functions.config().openai.key,
+   });
+   const openai = new OpenAIApi(configuration);
+   
+   exports.generateQuiz = functions.https.onCall(async (data, context) => {
+     if (!context.auth) {
+       throw new functions.https.HttpsError('unauthenticated', 'Must be signed in');
+     }
+     
+     const { topic, numQuestions, difficulty, questionType } = data;
+     
+     const prompt = `Generate ${numQuestions} ${difficulty} difficulty ${questionType} questions about "${topic}".
+     
+     For each question, provide:
+     1. The question text
+     2. Four multiple choice options (A, B, C, D)
+     3. The correct answer (letter)
+     4. A brief explanation of why that answer is correct
+     
+     Format the response as a JSON array of objects with fields: questionText, options (array), correctAnswer, explanation.
+     
+     Ensure questions are educational, accurate, and appropriate for students.`;
+     
+     try {
+       const completion = await openai.createChatCompletion({
+         model: "gpt-4",
+         messages: [
+           { role: "system", content: "You are an expert educator creating quiz questions." },
+           { role: "user", content: prompt }
+         ],
+         temperature: 0.7,
+         max_tokens: 2000
+       });
+       
+       const responseText = completion.data.choices[0].message.content;
+       
+       // Parse the JSON response
+       // Remove markdown code fences if present
+       const jsonText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+       const questions = JSON.parse(jsonText);
+       
+       return { success: true, questions };
+       
+     } catch (error) {
+       console.error('OpenAI API error:', error);
+       throw new functions.https.HttpsError('internal', 'Failed to generate quiz');
+     }
+   });
+   
+   // Frontend usage
+   import { getFunctions, httpsCallable } from 'firebase/functions';
+   
+   const functions = getFunctions();
+   const generateQuiz = httpsCallable(functions, 'generateQuiz');
+   
+   const handleGenerateQuiz = async () => {
+     try {
+       const result = await generateQuiz({
+         topic: 'Photosynthesis',
+         numQuestions: 10,
+         difficulty: 'medium',
+         questionType: 'multiple choice'
+       });
+       
+       console.log('Generated questions:', result.data.questions);
+       // Save to Firestore and navigate to quiz interface
+       
+     } catch (error) {
+       console.error('Error generating quiz:', error);
+     }
+   };
+
+3. GOOGLE CALENDAR API INTEGRATION
+   
+   // Install Google API client
+   npm install @react-oauth/google gapi-script
+   
+   // services/googleCalendarService.js
+   import { gapi } from 'gapi-script';
+   
+   const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+   const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
+   const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
+   
+   export const initGoogleCalendar = () => {
+     gapi.load('client:auth2', () => {
+       gapi.client.init({
+         apiKey: API_KEY,
+         clientId: CLIENT_ID,
+         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
+         scope: SCOPES,
+       });
+     });
+   };
+   
+   export const signInToGoogle = async () => {
+     const auth = gapi.auth2.getAuthInstance();
+     await auth.signIn();
+   };
+   
+   export const addEventToGoogleCalendar = async (event) => {
+     const request = {
+       calendarId: 'primary',
+       resource: {
+         summary: event.title,
+         description: event.description,
+         start: {
+           dateTime: event.startDateTime,
+           timeZone: 'America/Los_Angeles',
+         },
+         end: {
+           dateTime: event.endDateTime,
+           timeZone: 'America/Los_Angeles',
+         },
+         reminders: {
+           useDefault: false,
+           overrides: [
+             { method: 'popup', minutes: 15 },
+           ],
+         },
+       },
+     };
+     
+     const response = await gapi.client.calendar.events.insert(request);
+     return response.result;
+   };
+   
+   export const getEventsFromGoogleCalendar = async (timeMin, timeMax) => {
+     const response = await gapi.client.calendar.events.list({
+       calendarId: 'primary',
+       timeMin: timeMin,
+       timeMax: timeMax,
+       showDeleted: false,
+       singleEvents: true,
+       orderBy: 'startTime',
+     });
+     
+     return response.result.items;
+   };
+
+================================================================================
+                      RESPONSIVE DESIGN BREAKPOINTS
+================================================================================
+
+// tailwind.config.js
+module.exports = {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        'primary-black': '#151313',
+        'vibrant-orange': '#ff5734',
+        'soft-purple': '#be94f5',
+        'warm-yellow': '#fccc42',
+        'light-cream': '#f7f7f5',
+        'cool-blue-gray': '#d4e4e8',
+        'success-green': '#4caf50',
+        'warning-red': '#f44336',
+        'info-blue': '#2196f3',
+        'muted-gray': '#9e9e9e',
+      },
+      fontFamily: {
+        'kodchasan': ['Kodchasan', 'sans-serif'],
+      },
+      borderRadius: {
+        'card': '24px',
+        'button': '20px',
+        'input': '12px',
+      },
+      boxShadow: {
+        'card': '0 2px 8px rgba(0, 0, 0, 0.08)',
+        'card-hover': '0 4px 16px rgba(0, 0, 0, 0.12)',
+      },
+    },
+    screens: {
+      'sm': '640px',   // Mobile landscape
+      'md': '768px',   // Tablet
+      'lg': '1024px',  // Desktop
+      'xl': '1280px',  // Large desktop
+      '2xl': '1536px', // Extra large
+    },
+  },
+  plugins: [],
+}
+
+// Responsive CSS patterns
+
+/* Mobile-first approach */
+.sidebar {
+  /* Mobile: hidden by default, show hamburger menu */
+  @apply hidden;
+}
+
+@media (min-width: 768px) {
+  .sidebar {
+    /* Tablet: icon-only sidebar */
+    @apply block w-20;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    /* Desktop: full sidebar with text */
+    @apply w-72;
+  }
+}
+
+.card-grid {
+  /* Mobile: 1 column */
+  @apply grid grid-cols-1 gap-6;
+}
+
+@media (min-width: 768px) {
+  .card-grid {
+    /* Tablet: 2 columns */
+    @apply grid-cols-2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-grid {
+    /* Desktop: 3 columns */
+    @apply grid-cols-3;
+  }
+}
+
+/* Mobile optimizations */
+.mobile-nav {
+  /* Bottom navigation for mobile */
+  @apply fixed bottom-0 left-0 right-0 bg-primary-black h-16 flex justify-around items-center md:hidden;
+}
+
+.touch-target {
+  /* Minimum touch target size for mobile */
+  @apply min-h-[44px] min-w-[44px];
+}
+
+================================================================================
+                      PERFORMANCE OPTIMIZATIONS
+================================================================================
+
+1. CODE SPLITTING & LAZY LOADING
+   
+   // App.js
+   import { lazy, Suspense } from 'react';
+   import { BrowserRouter, Routes, Route } from 'react-router-dom';
+   import LoadingSpinner from './components/common/LoadingSpinner';
+   
+   // Lazy load route components
+   const Dashboard = lazy(() => import('./pages/DashboardPage'));
+   const PrivateSpace = lazy(() => import('./pages/PrivateSpacePage'));
+   const RoomPage = lazy(() => import('./pages/RoomPage'));
+   const QuizPage = lazy(() => import('./pages/QuizPage'));
+   const MeetingPage = lazy(() => import('./pages/MeetingPage'));
+   
+   function App() {
+     return (
+       <BrowserRouter>
+         <Suspense fallback={<LoadingSpinner />}>
+           <Routes>
+             <Route path="/" element={<Dashboard />} />
+             <Route path="/private-space" element={<PrivateSpace />} />
+             <Route path="/room/:roomId" element={<RoomPage />} />
+             <Route path="/quiz/:quizId" element={<QuizPage />} />
+             <Route path="/meeting/:meetingId" element={<MeetingPage />} />
+           </Routes>
+         </Suspense>
+       </BrowserRouter>
+     );
+   }
+
+2. REACT QUERY FOR DATA CACHING
+   
+   // Install React Query
+   npm install @tanstack/react-query
+   
+   // App.js
+   import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+   
+   const queryClient = new QueryClient({
+     defaultOptions: {
+       queries: {
+         staleTime: 5 * 60 * 1000, // 5 minutes
+         cacheTime: 10 * 60 * 1000, // 10 minutes
+         refetchOnWindowFocus: false,
+       },
+     },
+   });
+   
+   function App() {
+     return (
+       <QueryClientProvider client={queryClient}>
+         {/* ... rest of app */}
+       </QueryClientProvider>
+     );
+   }
+   
+   // hooks/useRooms.js
+   import { useQuery } from '@tanstack/react-query';
+   import { collection, query, where, getDocs } from 'firebase/firestore';
+   import { db } from '../firebase.config';
+   import { useAuth } from './useAuth';
+   
+   export const useUserRooms = () => {
+     const { user } = useAuth();
+     
+     return useQuery(
+       ['rooms', user?.uid],
+       async () => {
+         if (!user) return [];
+         
+         const q = query(
+           collection(db, 'rooms'),
+           where('members', 'array-contains', user.uid)
+         );
+         
+         const snapshot = await getDocs(q);
+         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+       },
+       {
+         enabled: !!user,
+       }
+     );
+   };
+
+3. IMAGE OPTIMIZATION
+   
+   // Install Sharp for image processing (in Cloud Functions)
+   npm install sharp
+   
+   // Cloud Function to generate thumbnails
+   const functions = require('firebase-functions');
+   const admin = require('firebase-admin');
+   const sharp = require('sharp');
+   
+   exports.generateThumbnail = functions.storage.object().onFinalize(async (object) => {
+     const filePath = object.name;
+     const contentType = object.contentType;
+     
+     if (!contentType.startsWith('image/')) {
+       return null;
+     }
+     
+     if (filePath.includes('thumb_')) {
+       return null; // Already a thumbnail
+     }
+     
+     const bucket = admin.storage().bucket(object.bucket);
+     const fileName = filePath.split('/').pop();
+     const thumbFileName = `thumb_${fileName}`;
+     const thumbFilePath = filePath.replace(fileName, thumbFileName);
+     
+     const tempFilePath = `/tmp/${fileName}`;
+     const tempThumbPath = `/tmp/${thumbFileName}`;
+     
+     await bucket.file(filePath).download({ destination: tempFilePath });
+     
+     await sharp(tempFilePath)
+       .resize(200, 200, { fit: 'cover' })
+       .toFile(tempThumbPath);
+     
+     await bucket.upload(tempThumbPath, {
+       destination: thumbFilePath,
+       metadata: {
+         contentType: contentType,
+       },
+     });
+     
+     return null;
+   });
+   
+   // Frontend: Use WebP format when possible
+   // components/common/OptimizedImage.jsx
+   const OptimizedImage = ({ src, alt, className }) => {
+     return (
+       <picture>
+         <source srcSet={`${src}.webp`} type="image/webp" />
+         <img src={src} alt={alt} className={className} loading="lazy" />
+       </picture>
+     );
+   };
+
+4. VIRTUAL SCROLLING FOR LONG LISTS
+   
+   // Install react-window
+   npm install react-window
+   
+   // components/chat/VirtualMessageList.jsx
+   import { FixedSizeList } from 'react-window';
+   
+   const VirtualMessageList = ({ messages }) => {
+     const Row = ({ index, style }) => (
+       <div style={style}>
+         <MessageBubble message={messages[index]} />
+       </div>
+     );
+     
+     return (
+       <FixedSizeList
+         height={600}
+         itemCount={messages.length}
+         itemSize={80}
+         width="100%"
+       >
+         {Row}
+       </FixedSizeList>
+     );
+   };
+
+5. DEBOUNCING & THROTTLING
+   
+   // hooks/useDebounce.js
+   import { useState, useEffect } from 'react';
+   
+   export const useDebounce = (value, delay = 500) => {
+     const [debouncedValue, setDebouncedValue] = useState(value);
+     
+     useEffect(() => {
+       const handler = setTimeout(() => {
+         setDebouncedValue(value);
+       }, delay);
+       
+       return () => {
+         clearTimeout(handler);
+       };
+     }, [value, delay]);
+     
+     return debouncedValue;
+   };
+   
+   // Usage in search input
+   const SearchBar = () => {
+     const [searchTerm, setSearchTerm] = useState('');
+     const debouncedSearchTerm = useDebounce(searchTerm, 500);
+     
+     useEffect(() => {
+       if (debouncedSearchTerm) {
+         // Perform search
+         performSearch(debouncedSearchTerm);
+       }
+     }, [debouncedSearchTerm]);
+     
+     return (
+       <input
+         type="text"
+         value={searchTerm}
+         onChange={(e) => setSearchTerm(e.target.value)}
+         placeholder="Search..."
+       />
+     );
+   };
+
+================================================================================
+                      ACCESSIBILITY (A11Y) GUIDELINES
+================================================================================
+
+1. Semantic HTML structure
+   - Use <nav>, <main>, <article>, <aside>, <header>, <footer>
+   - Proper heading hierarchy (h1 -> h2 -> h3)
+   - Use <button> for actions, <a> for navigation
+
+2. ARIA attributes
+   - aria-label for icon-only buttons
+   - aria-describedby for form field descriptions
+   - aria-live for dynamic content updates (notifications)
+   - role attributes when semantic HTML isn't sufficient
+
+3. Keyboard navigation
+   - Tab order follows visual order
+   - Focus indicators clearly visible (outline: 2px solid #ff5734)
+   - Escape key closes modals
+   - Enter/Space activates buttons
+   - Arrow keys navigate lists/menus
+
+4. Color contrast
+   - Text contrast ratio ≥ 4.5:1 (WCAG AA standard)
+   - Test all color combinations (use WebAIM contrast checker)
+   - Don't rely on color alone to convey information
+
+5. Screen reader support
+   - Alt text for all images
+   - Form labels associated with inputs
+   - Skip to main content link
+   - Announce dynamic content changes
+
+6. Focus management
+   - Move focus to modal when opened
+   - Trap focus inside modal (can't tab outside)
+   - Return focus to trigger element when closed
+   - Manage focus after route changes
+
+// Example: Accessible Modal
+const AccessibleModal = ({ isOpen, onClose, title, children }) => {
+  const modalRef = useRef();
+  const closeButtonRef = useRef();
+  
+  useEffect(() => {
+    if (isOpen) {
+      closeButtonRef.current?.focus();
+    }
+  }, [isOpen]);
+  
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+  
+  if (!isOpen) return null;
+  
+  return (
+    <div
+      className="modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      onKeyDown={handleKeyDown}
+      ref={modalRef}
+    >
+      <div className="modal-content">
+        <div className="modal-header">
+          <h2 id="modal-title">{title}</h2>
+          <button
+            ref={closeButtonRef}
+            onClick={onClose}
+            aria-label="Close modal"
+            className="close-btn"
+          >
+            ×
+          </button>
+        </div>
+        <div className="modal-body">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+================================================================================
+                      PROGRESSIVE WEB APP (PWA) SETUP
+================================================================================
+
+1. Create service worker
+   
+   // public/service-worker.js
+   const CACHE_NAME = 'studysync-v1';
+   const urlsToCache = [
+     '/',
+     '/index.html',
+     '/static/css/main.css',
+     '/static/js/main.js',
+     '/manifest.json',
+     '/logo192.png',
+     '/logo512.png',
+   ];
+   
+   // Install service worker
+   self.addEventListener('install', (event) => {
+     event.waitUntil(
+       caches.open(CACHE_NAME)
+         .then((cache) => cache.addAll(urlsToCache))
+     );
+   });
+   
+   // Fetch from cache first, then network
+   self.addEventListener('fetch', (event) => {
+     event.respondWith(
+       caches.match(event.request)
+         .then((response) => {
+           if (response) {
+             return response;
+           }
+           return fetch(event.request);
+         })
+     );
+   });
+   
+   // Delete old caches
+   self.addEventListener('activate', (event) => {
+     event.waitUntil(
+       caches.keys().then((cacheNames) => {
+         return Promise.all(
+           cacheNames.map((cacheName) => {
+             if (cacheName !== CACHE_NAME) {
+               return caches.delete(cacheName);
+             }
+           })
+         );
+       })
+     );
+   });
+
+2. Web App Manifest
+   
+   // public/manifest.json
+   {
+     "short_name": "StudySync",
+     "name": "StudySync - Collaborative Study Platform",
+     "description": "Study together with friends and ace your exams",
+     "icons": [
+       {
+         "src": "logo192.png",
+         "type": "image/png",
+         "sizes": "192x192"
+       },
+       {
+         "src": "logo512.png",
+         "type": "image/png",
+         "sizes": "512x512"
+       }
+     ],
+     "start_url": "/",
+     "display": "standalone",
+     "theme_color": "#151313",
+     "background_color": "#d4e4e8",
+     "orientation": "portrait"
+   }
+
+3. Register service worker
+   
+   // src/index.js
+   import React from 'react';
+   import ReactDOM from 'react-dom/client';
+   import App from './App';
+   import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+   
+   const root = ReactDOM.createRoot(document.getElementById('root'));
+   root.render(
+     <React.StrictMode>
+       <App />
+     </React.StrictMode>
+   );
+   
+   // Register service worker
+   serviceWorkerRegistration.register();
+
+================================================================================
+                      DEPLOYMENT INSTRUCTIONS
+================================================================================
+
+1. SETUP ENVIRONMENT VARIABLES
+   
+   Create .env file in project root:
+   
+   # Firebase
+   REACT_APP_FIREBASE_API_KEY=your_api_key
+   REACT_APP_FIREBASE_AUTH_DOMAIN=your_auth_domain
+   REACT_APP_FIREBASE_PROJECT_ID=your_project_id
+   REACT_APP_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+   REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   REACT_APP_FIREBASE_APP_ID=your_app_id
+   
+   # Agora
+   REACT_APP_AGORA_APP_ID=your_agora_app_id
+   
+   # Google
+   REACT_APP_GOOGLE_CLIENT_ID=your_google_client_id
+   REACT_APP_GOOGLE_API_KEY=your_google_api_key
+   
+   # OpenAI (store in Firebase Functions config, not frontend)
+   # firebase functions:config:set openai.key="your_openai_api_key"
+
+2. BUILD FOR PRODUCTION
+   
+   npm run build
+
+3. DEPLOY TO FIREBASE HOSTING
+   
+   # Install Firebase CLI
+   npm install -g firebase-tools
+   
+   # Login to Firebase
+   firebase login
+   
+   # Initialize Firebase in project
+   firebase init
+   # Select: Hosting, Functions, Firestore, Storage
+   
+   # Deploy everything
+   firebase deploy
+   
+   # Or deploy specific services
+   firebase deploy --only hosting
+   firebase deploy --only functions
+   firebase deploy --only firestore:rules
+   firebase deploy --only storage:rules
+
+4. CONTINUOUS DEPLOYMENT (GitHub Actions)
+   
+   # .github/workflows/deploy.yml
+   name: Deploy to Firebase
+   
+   on:
+     push:
+       branches:
+         - main
+   
+   jobs:
+     build-and-deploy:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: actions/checkout@v2
+         
+         - name: Install dependencies
+           run: npm ci
+         
+         - name: Build
+           run: npm run build
+           env:
+             REACT_APP_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+             # ... other env vars
+         
+         - name: Deploy to Firebase
+           uses: w9jds/firebase-action@master
+           with:
+             args: deploy --only hosting
+           env:
+             FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+================================================================================
+                      TESTING STRATEGY
+================================================================================
+
+1. UNIT TESTS (Jest + React Testing Library)
+   
+   npm install --save-dev @testing-library/react @testing-library/jest-dom
+   
+   // components/__tests__/RoomCard.test.js
+   import { render, screen, fireEvent } from '@testing-library/react';
+   import RoomCard from '../rooms/RoomCard';
+   
+   describe('RoomCard', () => {
+     const mockRoom = {
+       id: '1',
+       name: 'CS101 Study Group',
+       description: 'Study together for CS101',
+       subject: 'Computer Science',
+       code: 'ABC123',
+       members: [],
+       memberLimit: 20,
+       isJoined: false,
+     };
+     
+     test('renders room name and description', () => {
+       render(<RoomCard room={mockRoom} />);
+       expect(screen.getByText('CS101 Study Group')).toBeInTheDocument();
+       expect(screen.getByText('Study together for CS101')).toBeInTheDocument();
+     });
+     
+     test('shows "Join Room" button when not joined', () => {
+       render(<RoomCard room={mockRoom} />);
+       expect(screen.getByText('Join Room')).toBeInTheDocument();
+     });
+     
+     test('calls onClick handler when button clicked', () => {
+       const handleClick = jest.fn();
+       render(<RoomCard room={mockRoom} onClick={handleClick} />);
+       fireEvent.click(screen.getByText('Join Room'));
+       expect(handleClick).toHaveBeenCalledTimes(1);
+     });
+   });
+
+2. INTEGRATION TESTS
+   
+   Test user flows:
+   - User registration → profile setup → join room
+   - Create quiz → take quiz → view results
+   - Start study timer → log session → view analytics
+
+3. E2E TESTS (Cypress)
+   
+   npm install --save-dev cypress
+   
+   // cypress/e2e/room-joining.cy.js
+   describe('Room Joining Flow', () => {
+     beforeEach(() => {
+       cy.visit('http://localhost:3000');
+       cy.login(); // Custom command for authentication
+     });
+     
+     it('allows user to join a room with code', () => {
+       cy.get('[data-testid="join-room-btn"]').click();
+       cy.get('[data-testid="room-code-input"]').type('ABC123');
+       cy.get('[data-testid="submit-code-btn"]').click();
+       cy.url().should('include', '/room/');
+       cy.contains('CS101 Study Group').should('be.visible');
+     });
+   });
+
+4. FIRESTORE SECURITY RULES TESTING
+   
+   npm install --save-dev @firebase/rules-unit-testing
+   
+   Test that users can only access their own data, room members can read room data, etc.
+
+================================================================================
+                      ERROR HANDLING & MONITORING
+================================================================================
+
+1. ERROR BOUNDARIES (React)
+   
+   // components/common/ErrorBoundary.jsx
+   import React from 'react';
+   
+   class ErrorBoundary extends React.Component {
+     constructor(props) {
+       super(props);
+       this.state = { hasError: false, error: null };
+     }
+     
+     static getDerivedStateFromError(error) {
+       return { hasError: true, error };
+     }
+     
+     componentDidCatch(error, errorInfo) {
+       console.error('Error caught by boundary:', error, errorInfo);
+       // Send to error tracking service (Sentry, LogRocket, etc.)
+     }
+     
+     render() {
+       if (this.state.hasError) {
+         return (
+           <div className="error-page">
+             <h1>Oops! Something went wrong</h1>
+             <p>We're sorry for the inconvenience. Please try refreshing the page.</p>
+             <button onClick={() => window.location.reload()}>Refresh</button>
+           </div>
+         );
+       }
+       
+       return this.props.children;
+     }
+   }
+
+2. GLOBAL ERROR HANDLING
+   
+   // utils/errorHandler.js
+   export const handleFirebaseError = (error) => {
+     const errorMessages = {
+       'auth/user-not-found': 'No user found with this email',
+       'auth/wrong-password': 'Incorrect password',
+       'auth/email-already-in-use': 'Email already registered',
+       'auth/weak-password': 'Password should be at least 6 characters',
+       'permission-denied': 'You do not have permission to perform this action',
+       'not-found': 'The requested resource was not found',
+     };
+     
+     return errorMessages[error.code] || 'An unexpected error occurred. Please try again.';
+   };
+
+3. TOAST NOTIFICATIONS FOR ERRORS
+   
+   // Install react-toastify
+   npm install react-toastify
+   
+   // App.js
+   import { ToastContainer } from 'react-toastify';
+   import 'react-toastify/dist/ReactToastify.css';
+   
+   function App() {
+     return (
+       <>
+         <ToastContainer position="top-right" autoClose={3000} />
+         {/* ... rest of app */}
+       </>
+     );
+   }
+   
+   // Usage
+   import { toast } from 'react-toastify';
+   
+   const handleError = (error) => {
+     toast.error(handleFirebaseError(error));
+   };
+
+================================================================================
+                   DEVELOPMENT WORKFLOW & BEST PRACTICES
+================================================================================
+
+1. GIT WORKFLOW
+   
+   main (production)
+     ↓
+   develop (staging)
+     ↓
+   feature/feature-name (feature branches)
+   
+   # Create feature branch
+   git checkout -b feature/quiz-generation
+   
+   # Make changes, commit
+   git add .
+   git commit -m "feat: add AI quiz generation"
+   
+   # Push to remote
+   git push origin feature/quiz-generation
+   
+   # Create pull request to develop
+   # After review, merge to develop
+   # Test on staging
+   # Merge develop to main for production
+
+2. COMMIT MESSAGE CONVENTION
+   
+   feat: New feature
+   fix: Bug fix
+   docs: Documentation changes
+   style: Formatting, missing semicolons, etc.
+   refactor: Code restructuring
+   test: Adding tests
+   chore: Updating dependencies, build tasks
+   
+   Example: "feat: implement real-time chat with Socket.io"
+
+3. CODE REVIEW CHECKLIST
+   
+   - Does it work? (functionality)
+   - Is it readable? (clean code)
+   - Is it maintainable? (documentation, comments)
+   - Is it performant? (optimizations)
+   - Is it secure? (no vulnerabilities)
+   - Is it accessible? (a11y)
+   - Are there tests? (unit/integration)
+
+4. DOCUMENTATION
+   
+   - README.md with setup instructions
+   - CONTRIBUTING.md for contributors
+   - API documentation (JSDoc comments)
+   - Component prop types (PropTypes or TypeScript)
+   - Storybook for component showcase (optional)
+
+================================================================================
+              FUTURE ENHANCEMENTS & ROADMAP (POST-MVP)
+================================================================================
+
+PHASE 1: MVP (Weeks 1-8)
+✓ Authentication & User Management
+✓ Room System (create, join, manage)
+✓ Basic Chat (text, files)
+✓ Study Timer (personal)
+✓ Personal To-Do List
+✓ Basic Quiz (manual creation)
+
+PHASE 2: Collaboration Features (Weeks 9-14)
+✓ Group Chat with advanced features (@mentions, threads, reactions)
+✓ Doubt Raise System (ticket-based)
+✓ Resource Library (file sharing, organization)
+✓ AI Quiz Generation (OpenAI integration)
+✓ Leaderboards
+
+PHASE 3: Advanced Features (Weeks 15-22)
+✓ Video Meetings (Agora/Daily.co integration)
+✓ Analytics Dashboard (personal & room)
+✓ Study Planner (calendar, auto-schedule)
+✓ Gamification (badges, XP, levels)
+✓ Study Buddy Matching
+✓ Focus Mode
+✓ Collaborative Notes
+
+PHASE 4: Polish & Scale (Weeks 23-26)
+✓ Performance optimization (lazy loading, caching, virtual scrolling)
+✓ Mobile responsiveness
+✓ PWA features (offline mode, install prompt)
+✓ Comprehensive testing (unit, integration, e2e)
+✓ Security audit
+✓ User onboarding tour
+✓ Marketing website
+
+FUTURE ENHANCEMENTS:
+- Mobile apps (React Native for iOS & Android)
+- AI Study Assistant (ChatBot for instant doubt solving)
+- Integration with LMS platforms (Moodle, Canvas, Google Classroom import)
+- Flashcard system with spaced repetition algorithm
+- Voice notes in chat
+- Live collaborative whiteboard (beyond basic meeting whiteboard)
+- Study music playlists (Spotify integration)
+- Pomodoro break activities (mini-games, stretching exercises)
+- Parent/Teacher dashboard (monitoring for younger students)
+- Export study reports as PDF certificates
+- Browser extension for quick access
+- Smart study recommendations (AI suggests topics based on weak areas)
+- Integration with note-taking apps (Notion, Evernote)
+- Study challenges & competitions
+- Virtual study spaces (3D rooms with avatars)
+
+================================================================================
+                      IMPORTANT NOTES FOR AI AGENT
+================================================================================
+
+1. PRIORITIES:
+   - Security first (implement Firestore & Storage rules correctly)
+   - User experience (smooth, intuitive UI)
+   - Performance (fast loading, optimized queries)
+   - Accessibility (WCAG AA compliance)
+   - Mobile responsiveness (mobile-first approach)
+
+2. CODE QUALITY:
+   - Write clean, readable, well-documented code
+   - Follow React best practices (hooks, functional components)
+   - Use TypeScript if possible for type safety
+   - Implement proper error handling
+   - Write meaningful commit messages
+   - Add comments for complex logic
+
+3. FIREBASE BEST PRACTICES:
+   - Minimize reads/writes (cache with React Query)
+   - Use batch writes when updating multiple documents
+   - Index Firestore queries properly
+   - Compress images before uploading to Storage
+   - Use Cloud Functions for server-side logic
+   - Monitor usage (Firestore, Functions, Storage quotas)
+
+4. SECURITY:
+   - Never expose API keys in frontend code (use environment variables)
+   - Implement proper authentication checks
+   - Validate all user inputs (both frontend & backend)
+   - Sanitize user-generated content (prevent XSS)
+   - Use HTTPS only
+   - Implement rate limiting for API calls
+   - Regular security audits
+
+5. TESTING:
+   - Write tests as you code (TDD approach)
+   - Aim for >70% code coverage
+   - Test edge cases
+   - Test error states
+   - Manual testing on different devices/browsers
+
+6. DOCUMENTATION:
+   - README with clear setup instructions
+   - Inline code comments for complex logic
+   - API documentation for Cloud Functions
+   - User documentation (help pages, FAQs)
+
+7. DEPLOYMENT:
+   - Use staging environment for testing
+   - Never deploy directly to production
+   - Implement CI/CD pipeline (GitHub Actions)
+   - Monitor errors in production (Sentry, Firebase Crashlytics)
+   - Have rollback plan
+
+8. COMMUNICATION:
+   - Keep stakeholders updated on progress
+   - Document decisions (architectural, design)
+   - Ask for clarification when requirements are unclear
+   - Provide realistic timelines
+
+================================================================================
+                    MODERN GEN-Z NAME SUGGESTIONS
+================================================================================
+
+Here are some modern, Gen-Z friendly name suggestions for the platform:
+
+1. **CoStudy** - Simple, clear, collaborative
+2. **StudySphere** - Suggests a complete study ecosystem
+3. **Grindmate** - Gen-Z slang for studying hard + mate (friend)
+4. **SquadStudy** - Emphasizes the group/friend aspect
+5. **CramCrew** - Fun, energetic, study-focused
+6. **BrainBuddies** - Friendly, approachable
+7. **StudySquad** - Direct and community-focused
+8. **Focusfam** - Focus + fam (family/friends)
+9. **GrindSpace** - Workspace for grinding (studying hard)
+10. **StudySync** - Sync with friends, sync your learning
+11. **CoLearn** - Collaborative learning
+12. **StudyHub** - Central hub for studying
+13. **LitLearn** - "Lit" (Gen-Z slang for awesome) + Learn
+14. **NoCapStudy** - "No cap" (Gen-Z slang for no lie/for real) + Study
+15. **VibeSstudy** - Good vibes + study
+
+RECOMMENDED TOP 3:
+1. **StudySync** ⭐ (Best: Professional yet modern, implies synchronization)
+2. **CoStudy** (Clean, simple, memorable)
+3. **SquadStudy** (Fun, emphasizes the friend group aspect)
+
+My personal recommendation: **StudySync**
+- Modern and catchy
+- Professional enough for academic use
+- Implies real-time collaboration ("sync")
+- Easy to remember and pronounce
+- Good for branding (.com likely available)
+- Appeals to Gen-Z while being timeless
+
+Alternative cool names:
+- **Studify** (Study + -ify, like Spotify)
+- **Uprate** (Rate yourself up, improve)
+- **Grindly** (Grind + friendly)
+
+Choose based on:
+- Domain availability (.com, .app, .io)
+- Social media handle availability
+- Brand identity you want to project
+- Target audience preference
+
+================================================================================
+                          END OF BUILD PROMPT
+================================================================================
+
+This comprehensive prompt provides all the information needed to build a
+full-featured collaborative study platform. Follow the specifications, implement
+the features in phases, maintain high code quality, and prioritize user experience.
+
+Good luck with the build! 🚀
+
+For questions or clarifications, refer to this document or consult with the
+project stakeholders.

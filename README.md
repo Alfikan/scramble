@@ -1,70 +1,277 @@
-# Getting Started with Create React App
+# 🎓 Scramble - Collaborative Study Platform
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> **Study together, achieve together!** A modern, fun, and friendly platform where students can collaborate, learn, and excel in their academic journey.
 
-## Available Scripts
+![Scramble Banner](https://via.placeholder.com/800x200/ff5734/ffffff?text=Scramble+-+Study+Together)
 
-In the project directory, you can run:
+## ✨ What is Scramble?
 
-### `npm start`
+Scramble is a comprehensive collaborative study platform designed for Gen-Z students who want to make studying social, engaging, and effective. Think of it as Discord meets Google Classroom with a sprinkle of gamification magic!
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 🎯 Core Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **🏠 Private Study Space** - Your personal study sanctuary with timers, to-dos, and analytics
+- **👥 Study Rooms** - Join or create study groups with friends and classmates
+- **🎮 Quiz Sprints** - AI-powered competitive quizzes that make learning fun
+- **💬 Smart Chat** - Rich messaging with LaTeX math, code snippets, and file sharing
+- **📹 Video Meetings** - Built-in video calls with screen sharing and collaborative whiteboard
+- **❓ Doubt System** - Ticket-based help system for getting answers fast
+- **📊 Analytics** - Track your progress and see your study patterns
+- **🏆 Gamification** - Earn XP, badges, and climb leaderboards
+- **🤖 AI Assistant** - Get help with quiz generation and study recommendations
 
-### `npm test`
+## 🚀 Quick Start
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Prerequisites
 
-### `npm run build`
+- Node.js 16+ 
+- npm or yarn
+- Firebase account
+- Git
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Installation
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/scramble.git
+   cd scramble
+   ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-### `npm run eject`
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your Firebase and API keys
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+4. **Start the development server**
+   ```bash
+   npm start
+   ```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+5. **Open your browser**
+   Navigate to `http://localhost:3000`
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 🛠️ Tech Stack
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Frontend
+- **React 19** - Modern UI library with hooks
+- **Tailwind CSS** - Utility-first styling
+- **Framer Motion** - Smooth animations
+- **React Router v6** - Client-side routing
+- **React Query** - Data fetching and caching
+- **React Hook Form + Yup** - Forms and validation
 
-## Learn More
+### Backend & Services
+- **Firebase Auth** - Authentication (Email, Google, Microsoft)
+- **Cloud Firestore** - NoSQL database
+- **Cloud Storage** - File and media storage
+- **Cloud Functions** - Serverless backend logic
+- **Firebase Realtime Database** - Real-time presence
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Third-Party Integrations
+- **Agora.io** - Video calling and screen sharing
+- **OpenAI API** - AI quiz generation
+- **Google Calendar API** - Schedule synchronization
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🎨 Design System
 
-### Code Splitting
+### Typography
+- **Font**: Kodchasan (Google Fonts)
+- **Weights**: 300, 400, 500, 600, 700
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Color Palette
+- **Deep Black**: `#151313` - Primary text, headers
+- **Vibrant Orange**: `#ff5734` - CTAs, active states
+- **Soft Purple**: `#be94f5` - Group study features
+- **Warm Yellow**: `#fccc42` - Private space features
+- **Light Cream**: `#f7f7f5` - Card backgrounds
+- **Cool Blue-Gray**: `#d4e4e8` - Main background
 
-### Analyzing the Bundle Size
+### Design Principles
+- **Card-based UI** with 24px border radius
+- **Generous spacing** (24-32px padding)
+- **Soft shadows** for depth
+- **Smooth transitions** (0.3s ease)
+- **Mobile-first** responsive design
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 📱 Mobile Support
 
-### Making a Progressive Web App
+Scramble is built as a Progressive Web App (PWA) with Capacitor for native mobile features:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- **iOS App** - Deploy to App Store
+- **Android App** - Deploy to Google Play Store
+- **Offline Mode** - Study even without internet
+- **Push Notifications** - Stay updated on study activities
 
-### Advanced Configuration
+## 🔧 Development
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Project Structure
+```
+src/
+├── components/          # Reusable UI components
+│   ├── common/         # Generic components (Button, Modal, etc.)
+│   ├── auth/           # Authentication components
+│   ├── rooms/          # Room-related components
+│   ├── chat/           # Chat and messaging
+│   ├── quiz/           # Quiz and assessment components
+│   └── meetings/       # Video meeting components
+├── pages/              # Route components
+├── hooks/              # Custom React hooks
+├── services/           # API and external service integrations
+├── utils/              # Helper functions
+├── contexts/           # React contexts
+└── styles/             # Global styles and Tailwind config
+```
 
-### Deployment
+### Available Scripts
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- `npm start` - Start development server
+- `npm run build` - Build for production
+- `npm test` - Run tests
+- `npm run lint` - Lint code
+- `npm run format` - Format code with Prettier
 
-### `npm run build` fails to minify
+### Building for Mobile
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```bash
+# Build web app
+npm run build
+
+# Add mobile platforms
+npx cap add ios
+npx cap add android
+
+# Sync and open in IDE
+npx cap sync
+npx cap open ios
+npx cap open android
+```
+
+## 🧪 Testing
+
+We use a comprehensive testing strategy:
+
+- **Unit Tests** - Jest + React Testing Library
+- **Integration Tests** - Testing user flows
+- **E2E Tests** - Cypress for full user journeys
+- **Security Tests** - Firestore rules testing
+
+```bash
+npm test                 # Run unit tests
+npm run test:e2e        # Run E2E tests
+npm run test:coverage   # Generate coverage report
+```
+
+## 🚀 Deployment
+
+### Firebase Hosting
+
+```bash
+# Install Firebase CLI
+npm install -g firebase-tools
+
+# Login and initialize
+firebase login
+firebase init
+
+# Deploy
+firebase deploy
+```
+
+### Environment Variables
+
+Create `.env` file with:
+
+```env
+# Firebase
+REACT_APP_FIREBASE_API_KEY=your_api_key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your_auth_domain
+REACT_APP_FIREBASE_PROJECT_ID=your_project_id
+REACT_APP_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+REACT_APP_FIREBASE_APP_ID=your_app_id
+
+# Agora
+REACT_APP_AGORA_APP_ID=your_agora_app_id
+
+# Google
+REACT_APP_GOOGLE_CLIENT_ID=your_google_client_id
+REACT_APP_GOOGLE_API_KEY=your_google_api_key
+```
+
+## 🤝 Contributing
+
+We love contributions! Please read our [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- Code of conduct
+- Development process
+- Pull request process
+- Coding standards
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Write tests
+5. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Firebase** - For the amazing backend infrastructure
+- **Agora.io** - For seamless video calling capabilities
+- **OpenAI** - For AI-powered quiz generation
+- **Tailwind CSS** - For the beautiful and responsive design system
+- **React Community** - For the incredible ecosystem
+
+## 📞 Support
+
+- **Documentation**: [docs.scramble.app](https://docs.scramble.app)
+- **Discord Community**: [Join our Discord](https://discord.gg/scramble)
+- **Email Support**: support@scramble.app
+- **Bug Reports**: [GitHub Issues](https://github.com/yourusername/scramble/issues)
+
+## 🗺️ Roadmap
+
+### Phase 1: MVP (Current)
+- [x] Authentication & User Management
+- [x] Room System
+- [x] Basic Chat
+- [x] Study Timer
+- [x] Personal To-Do List
+- [ ] AI Quiz Generation
+
+### Phase 2: Collaboration
+- [ ] Advanced Chat Features
+- [ ] Doubt System
+- [ ] Resource Library
+- [ ] Leaderboards
+
+### Phase 3: Advanced Features
+- [ ] Video Meetings
+- [ ] Analytics Dashboard
+- [ ] Study Planner
+- [ ] Gamification System
+
+### Phase 4: Polish & Scale
+- [ ] Mobile Apps
+- [ ] Offline Mode
+- [ ] Performance Optimization
+- [ ] Advanced AI Features
+
+---
+
+**Made with ❤️ by students, for students**
+
+*Study smarter, not harder. Study together with Scramble!* 🎓✨
