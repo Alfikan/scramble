@@ -1,28 +1,154 @@
 {
-  "appId": "com.yourdoamnin.yourapp",
+  "appId": "com.scramble.app",
+  "productName": "Scramble",
+  "copyright": "Copyright © 2024 Scramble",
   "directories": {
-    "buildResources": "resources"
+    "buildResources": "build-resources",
+    "output": "dist"
   },
   "files": [
-    "assets/**/*",
     "build/**/*",
-    "capacitor.config.*",
-    "app/**/*"
+    "electron/**/*",
+    "!electron/electron-builder.config.json",
+    "node_modules/**/*",
+    "package.json"
   ],
-  "publish": {
-    "provider": "github"
+  "extraMetadata": {
+    "main": "electron/main.js"
   },
-  "nsis": {
-    "allowElevation": true,
-    "oneClick": false,
-    "allowToChangeInstallationDirectory": true
+  "publish": {
+    "provider": "github",
+    "owner": "unkown812",
+    "repo": "scramble"
   },
   "win": {
-    "target": "nsis",
-    "icon": "assets/appIcon.ico"
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64", "ia32"]
+      },
+      {
+        "target": "portable",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "public/Logo.png",
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "publisherName": "Scramble",
+    "verifyUpdateCodeSignature": false
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowElevation": true,
+    "allowToChangeInstallationDirectory": true,
+    "installerIcon": "public/Logo.png",
+    "uninstallerIcon": "public/Logo.png",
+    "installerHeaderIcon": "public/Logo.png",
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Scramble",
+    "perMachine": false,
+    "deleteAppDataOnUninstall": false
+  },
+  "portable": {
+    "artifactName": "${productName}-${version}-portable.${ext}"
   },
   "mac": {
-    "category": "your.app.category.type",
-    "target": "dmg"
+    "target": [
+      {
+        "target": "dmg",
+        "arch": ["x64", "arm64"]
+      },
+      {
+        "target": "zip",
+        "arch": ["x64", "arm64"]
+      }
+    ],
+    "icon": "public/Logo.png",
+    "category": "public.app-category.education",
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false,
+    "entitlements": "build-resources/entitlements.mac.plist",
+    "entitlementsInherit": "build-resources/entitlements.mac.plist",
+    "type": "distribution"
+  },
+  "dmg": {
+    "icon": "public/Logo.png",
+    "iconSize": 100,
+    "contents": [
+      {
+        "x": 380,
+        "y": 180,
+        "type": "link",
+        "path": "/Applications"
+      },
+      {
+        "x": 130,
+        "y": 180,
+        "type": "file"
+      }
+    ],
+    "window": {
+      "width": 540,
+      "height": 380
+    },
+    "backgroundColor": "#f5f5f5",
+    "title": "${productName} ${version}"
+  },
+  "linux": {
+    "target": [
+      {
+        "target": "AppImage",
+        "arch": ["x64", "arm64"]
+      },
+      {
+        "target": "deb",
+        "arch": ["x64", "arm64"]
+      },
+      {
+        "target": "rpm",
+        "arch": ["x64", "arm64"]
+      },
+      {
+        "target": "snap",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "public/Logo.png",
+    "category": "Education",
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "synopsis": "Collaborative Study Platform",
+    "description": "Study together, achieve together. A modern collaborative study platform for students.",
+    "desktop": {
+      "Name": "Scramble",
+      "Comment": "Collaborative Study Platform",
+      "Categories": "Education;Network;",
+      "Keywords": "study;education;collaboration;learning;"
+    }
+  },
+  "appImage": {
+    "license": "LICENSE"
+  },
+  "deb": {
+    "depends": [
+      "gconf2",
+      "gconf-service",
+      "libnotify4",
+      "libappindicator1",
+      "libxtst6",
+      "libnss3"
+    ],
+    "priority": "optional"
+  },
+  "snap": {
+    "confinement": "strict",
+    "grade": "stable",
+    "summary": "Collaborative Study Platform for Students"
+  },
+  "afterSign": "scripts/notarize.js",
+  "protocols": {
+    "name": "scramble",
+    "schemes": ["scramble"]
   }
 }

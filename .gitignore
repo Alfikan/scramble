@@ -24,3 +24,5 @@ yarn-error.log*
 
 .env
 env
+
+studysync_build_prompt.txt
