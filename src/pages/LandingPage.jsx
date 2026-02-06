@@ -26,7 +26,6 @@ import { useTheme } from '../contexts/ThemeContext';
  */
 const LandingPage = () => {
   const navigate = useNavigate();
-  const { toggleTheme, isDark } = useTheme();
 
   const features = [
     {
@@ -143,13 +142,7 @@ const LandingPage = () => {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center space-x-4"
           >
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-light-cream transition-colors"
-              aria-label="Toggle theme"
-            >
-              {isDark ? '☀️' : '🌙'}
-            </button>
+           
             <Button
               variant="ghost"
               onClick={() => navigate('/auth')}

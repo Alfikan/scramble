@@ -50,6 +50,7 @@ const DashboardPage = () => {
 
         // Fetch user's rooms
         const roomsResult = await getUserRooms(user.uid);
+        console.log('Dashboard - Fetched rooms:', roomsResult);
         if (roomsResult.success) {
           setUserRooms(roomsResult.rooms);
         }

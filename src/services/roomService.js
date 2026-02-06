@@ -76,8 +76,7 @@ export const getUserRooms = async (userId) => {
     const q = query(
       collection(db, 'rooms'),
       where('members', 'array-contains', userId),
-      where('isActive', '==', true),
-      orderBy('updatedAt', 'desc')
+      where('isActive', '==', true)
     );
 
     const querySnapshot = await getDocs(q);
@@ -88,6 +87,13 @@ export const getUserRooms = async (userId) => {
         id: doc.id,
         ...doc.data(),
       });
+    });
+
+    // Sort by updatedAt on client side
+    rooms.sort((a, b) => {
+      const aTime = a.updatedAt?.toMillis() || 0;
+      const bTime = b.updatedAt?.toMillis() || 0;
+      return bTime - aTime;
     });
 
     return { success: true, rooms };
