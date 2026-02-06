@@ -6,16 +6,12 @@ import {
   Clock, 
   Brain, 
   Trophy,
-  Calendar,
   MessageCircle,
-  Video,
-  Plus,
   ArrowRight
 } from 'lucide-react';
 
 import Button from '../components/common/Button';
 import Card, { CardHeader, CardTitle, CardContent } from '../components/common/Card';
-import Avatar from '../components/common/Avatar';
 import Badge from '../components/common/Badge';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserProfile, getUserStudySessions, getUserQuizAttempts } from '../services/userService';
@@ -178,46 +174,16 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-cool-blue-gray">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-muted-gray border-opacity-20">
-        <div className="container-app py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-primary-black">
-                Welcome back, {user?.displayName?.split(' ')[0] || 'Student'}! 👋
-              </h1>
-              <p className="text-muted-gray mt-1">
-                Ready to continue your learning journey?
-              </p>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                leftIcon={<Calendar size={18} />}
-                onClick={() => navigate('/private-space')}
-              >
-                Schedule
-              </Button>
-              <Button 
-                variant="primary" 
-                leftIcon={<Plus size={18} />}
-                onClick={() => navigate('/rooms')}
-              >
-                New Room
-              </Button>
-              <Avatar
-                src={user?.photoURL}
-                name={user?.displayName}
-                size="md"
-                online
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="container-app py-8">
+        {/* Welcome Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-primary-black">
+            Welcome back, {user?.displayName?.split(' ')[0] || 'Student'}! 👋
+          </h1>
+          <p className="text-muted-gray mt-1">
+            Ready to continue your learning journey?
+          </p>
+        </div>
         <motion.div
           variants={containerVariants}
           initial="hidden"

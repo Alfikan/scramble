@@ -3,17 +3,20 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Import pages (we'll create these next)
+// Import pages
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
 import PrivateSpacePage from './pages/PrivateSpacePage';
 import RoomsPage from './pages/RoomsPage';
 import RoomPage from './pages/RoomPage';
+import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 
 // Import components
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ErrorBoundary from './components/common/ErrorBoundary';
+import Layout from './components/layout/Layout';
 
 // Import contexts and hooks
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -108,6 +111,25 @@ const AnimatedRoute = ({ children }) => (
   </motion.div>
 );
 
+// Protected Route with Layout
+const ProtectedRouteWithLayout = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-cool-blue-gray">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return <Layout>{children}</Layout>;
+};
+
 // Main App Component
 function App() {
   return (
@@ -141,45 +163,65 @@ function App() {
                       } 
                     />
 
-                    {/* Protected Routes */}
+                    {/* Protected Routes with Layout */}
                     <Route 
                       path="/dashboard" 
                       element={
-                        <ProtectedRoute>
+                        <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <DashboardPage />
                           </AnimatedRoute>
-                        </ProtectedRoute>
+                        </ProtectedRouteWithLayout>
                       } 
                     />
                     <Route 
                       path="/private-space" 
                       element={
-                        <ProtectedRoute>
+                        <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <PrivateSpacePage />
                           </AnimatedRoute>
-                        </ProtectedRoute>
+                        </ProtectedRouteWithLayout>
                       } 
                     />
                     <Route 
                       path="/rooms" 
                       element={
-                        <ProtectedRoute>
+                        <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <RoomsPage />
                           </AnimatedRoute>
-                        </ProtectedRoute>
+                        </ProtectedRouteWithLayout>
                       } 
                     />
                     <Route 
                       path="/room/:roomId" 
                       element={
-                        <ProtectedRoute>
+                        <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <RoomPage />
                           </AnimatedRoute>
-                        </ProtectedRoute>
+                        </ProtectedRouteWithLayout>
+                      } 
+                    />
+                    <Route 
+                      path="/profile" 
+                      element={
+                        <ProtectedRouteWithLayout>
+                          <AnimatedRoute>
+                            <ProfilePage />
+                          </AnimatedRoute>
+                        </ProtectedRouteWithLayout>
+                      } 
+                    />
+                    <Route 
+                      path="/settings" 
+                      element={
+                        <ProtectedRouteWithLayout>
+                          <AnimatedRoute>
+                            <SettingsPage />
+                          </AnimatedRoute>
+                        </ProtectedRouteWithLayout>
                       } 
                     />
 
