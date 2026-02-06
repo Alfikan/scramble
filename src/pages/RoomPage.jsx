@@ -1,21 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Users, 
   Video, 
   MessageCircle, 
   Send,
-  Settings,
   LogOut,
   UserPlus,
-  MoreVertical,
   ArrowLeft,
   Phone,
   Mic,
   MicOff,
   VideoOff,
-  Share2
+  Share2,
+  Upload,
+  Download,
+  Trash2,
+  X,
+  Menu,
+  FileText,
+  Image as ImageIcon,
+  Film
 } from 'lucide-react';
 
 import Button from '../components/common/Button';
@@ -27,50 +33,55 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuth } from '../contexts/AuthContext';
 import { getRoomById, leaveRoom } from '../services/roomService';
 import { getUserProfile } from '../services/userService';
+import { useChat } from '../hooks/useChat';
+import { useResources } from '../hooks/useResources';
+import { useAgora } from '../hooks/useAgora';
+import { formatFileSize, getFileIcon } from '../services/resourceService';
 
 /**
- * Room Page - Individual study room with chat and video
+ * Room Page - Individual study room with chat, video, and resources
+ * Fully responsive and functional
  */
 const RoomPage = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const localVideoRef = useRef(null);
 
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('chat'); // 'chat', 'members', 'resources'
+  const [activeTab, setActiveTab] = useState('chat');
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      userId: 'user1',
-      userName: 'Alex Student',
-      userAvatar: null,
-      text: 'Hey everyone! Ready to study?',
-      timestamp: new Date(Date.now() - 3600000),
-    },
-    {
-      id: 2,
-      userId: 'user2',
-      userName: 'Sarah Chen',
-      userAvatar: null,
-      text: 'Yes! Let\'s start with Chapter 5',
-      timestamp: new Date(Date.now() - 3000000),
-    },
-    {
-      id: 3,
-      userId: user?.uid,
-      userName: user?.displayName || 'You',
-      userAvatar: user?.photoURL,
-      text: 'Sounds good! I have some questions about the homework.',
-      timestamp: new Date(Date.now() - 1800000),
-    },
-  ]);
   const [members, setMembers] = useState([]);
-  const [inCall, setInCall] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isVideoOff, setIsVideoOff] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+
+  // Use custom hooks
+  const { messages, sending, sendMessage: sendChatMessage } = useChat(roomId);
+  const { 
+    resources, 
+    uploading, 
+    uploadProgress, 
+    uploadFile, 
+    deleteResource: deleteResourceFile 
+  } = useResources(roomId);
+  
+  // Agora video calling
+  const {
+    inCall,
+    isMuted,
+    isVideoOff,
+    remoteUsers,
+    joining,
+    error: callError,
+    startCall,
+    endCall,
+    toggleMic,
+    toggleVideo,
+    playLocal
+  } = useAgora(roomId, user?.uid);
 
   useEffect(() => {
     const fetchRoomData = async () => {
@@ -93,7 +104,6 @@ const RoomPage = () => {
             setMembers(memberProfiles.filter(Boolean));
           }
         } else {
-          // Room not found or error
           alert('Room not found');
           navigate('/rooms');
         }
@@ -113,26 +123,34 @@ const RoomPage = () => {
     scrollToBottom();
   }, [messages]);
 
+  // Play remote videos when users join
+  useEffect(() => {
+    remoteUsers.forEach((remoteUser) => {
+      if (remoteUser.videoTrack) {
+        const containerId = `remote-video-${remoteUser.uid}`;
+        const container = document.getElementById(containerId);
+        if (container) {
+          remoteUser.videoTrack.play(containerId);
+        }
+      }
+      if (remoteUser.audioTrack) {
+        remoteUser.audioTrack.play();
+      }
+    });
+  }, [remoteUsers]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSendMessage = () => {
-    if (!message.trim()) return;
+  const handleSendMessage = async () => {
+    if (!message.trim() || sending) return;
 
-    const newMessage = {
-      id: Date.now(),
-      userId: user.uid,
-      userName: user.displayName || 'You',
-      userAvatar: user.photoURL,
-      text: message,
-      timestamp: new Date(),
-    };
-
-    setMessages([...messages, newMessage]);
-    setMessage('');
+    const result = await sendChatMessage(message);
     
-    // TODO: Send to Firestore
+    if (result.success) {
+      setMessage('');
+    }
   };
 
   const handleLeaveRoom = async () => {
@@ -145,29 +163,45 @@ const RoomPage = () => {
     }
   };
 
-  const handleStartCall = () => {
-    setInCall(true);
-    // TODO: Initialize Agora video call
+  const handleStartCall = async () => {
+    await startCall();
+    // Play local video after joining
+    setTimeout(() => {
+      if (localVideoRef.current) {
+        playLocal('local-video');
+      }
+    }, 1000);
   };
 
-  const handleEndCall = () => {
-    setInCall(false);
-    setIsMuted(false);
-    setIsVideoOff(false);
-    // TODO: End Agora video call
+  const handleEndCall = async () => {
+    await endCall();
   };
 
-  const formatTime = (date) => {
-    const now = new Date();
-    const diff = now - date;
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
+  const handleFileSelect = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
 
-    if (days > 0) return `${days}d ago`;
-    if (hours > 0) return `${hours}h ago`;
-    if (minutes > 0) return `${minutes}m ago`;
-    return 'Just now';
+    // Check file size (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      alert('File size must be less than 50MB');
+      return;
+    }
+
+    const result = await uploadFile(file);
+    
+    if (result.success) {
+      setShowUploadModal(false);
+      // Send message about file upload
+      await sendChatMessage(`📎 Uploaded: ${file.name}`, 'file');
+    } else {
+      alert('Failed to upload file: ' + result.error);
+    }
+  };
+
+  const handleDeleteResource = async (resource) => {
+    if (window.confirm(`Delete ${resource.fileName}?`)) {
+      await deleteResourceFile(resource.id, resource.storagePath);
+    }
   };
 
   if (loading) {
@@ -180,8 +214,8 @@ const RoomPage = () => {
 
   if (!room) {
     return (
-      <div className="min-h-screen bg-cool-blue-gray flex items-center justify-center">
-        <Card className="text-center">
+      <div className="min-h-screen bg-cool-blue-gray flex items-center justify-center p-4">
+        <Card className="text-center max-w-md">
           <h2 className="text-2xl font-bold text-primary-black mb-4">
             Room Not Found
           </h2>
@@ -200,31 +234,32 @@ const RoomPage = () => {
     <div className="min-h-screen bg-cool-blue-gray flex flex-col">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-muted-gray border-opacity-20">
-        <div className="container-app py-4">
+        <div className="container-app py-3 md:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-4 flex-1 min-w-0">
               <button
                 onClick={() => navigate('/rooms')}
-                className="p-2 hover:bg-light-cream rounded-lg transition-colors"
+                className="p-2 hover:bg-light-cream rounded-lg transition-colors flex-shrink-0"
               >
                 <ArrowLeft size={20} />
               </button>
-              <div>
-                <h1 className="text-2xl font-bold text-primary-black">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg md:text-2xl font-bold text-primary-black truncate">
                   {room.name}
                 </h1>
                 <div className="flex items-center space-x-2 mt-1">
                   <Badge variant="info" size="sm">
                     {room.subject}
                   </Badge>
-                  <span className="text-sm text-muted-gray">
+                  <span className="text-xs md:text-sm text-muted-gray">
                     {members.length} members
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
+            {/* Desktop Actions */}
+            <div className="hidden md:flex items-center space-x-2">
               {!inCall ? (
                 <Button
                   variant="primary"
@@ -251,81 +286,187 @@ const RoomPage = () => {
                 Leave
               </Button>
             </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="md:hidden p-2 hover:bg-light-cream rounded-lg transition-colors"
+            >
+              <Menu size={20} />
+            </button>
           </div>
+
+          {/* Mobile Menu */}
+          <AnimatePresence>
+            {showMobileMenu && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="md:hidden mt-4 space-y-2"
+              >
+                {!inCall ? (
+                  <Button
+                    variant="primary"
+                    className="w-full"
+                    leftIcon={<Video size={18} />}
+                    onClick={() => {
+                      handleStartCall();
+                      setShowMobileMenu(false);
+                    }}
+                  >
+                    Start Call
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="w-full text-warning-red"
+                    leftIcon={<Phone size={18} />}
+                    onClick={() => {
+                      handleEndCall();
+                      setShowMobileMenu(false);
+                    }}
+                  >
+                    End Call
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  leftIcon={<LogOut size={18} />}
+                  onClick={handleLeaveRoom}
+                >
+                  Leave Room
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
       {/* Video Call Area */}
       {inCall && (
         <div className="bg-primary-black">
-          <div className="container-app py-8">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {/* Video Placeholders */}
-              {members.slice(0, 4).map((member, index) => (
-                <div
-                  key={member.uid}
-                  className="aspect-video bg-muted-gray bg-opacity-20 rounded-lg flex items-center justify-center relative"
-                >
-                  <Avatar
-                    src={member.photoURL}
-                    name={member.displayName}
-                    size="lg"
-                  />
-                  <div className="absolute bottom-2 left-2 bg-primary-black bg-opacity-75 px-2 py-1 rounded text-white text-sm">
-                    {member.displayName}
+          <div className="container-app py-4 md:py-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-4">
+              {/* Local Video */}
+              <div className="aspect-video bg-muted-gray bg-opacity-20 rounded-lg flex items-center justify-center relative overflow-hidden">
+                <div id="local-video" ref={localVideoRef} className="w-full h-full" />
+                {isVideoOff && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-primary-black bg-opacity-75">
+                    <Avatar
+                      src={user?.photoURL}
+                      name={user?.displayName}
+                      size="lg"
+                    />
                   </div>
+                )}
+                <div className="absolute bottom-2 left-2 bg-primary-black bg-opacity-75 px-2 py-1 rounded text-white text-xs md:text-sm truncate max-w-[80%]">
+                  You {isMuted && '(Muted)'}
+                </div>
+              </div>
+
+              {/* Remote Users */}
+              {remoteUsers.map((remoteUser) => {
+                const member = members.find(m => m.uid === remoteUser.uid);
+                return (
+                  <div
+                    key={remoteUser.uid}
+                    className="aspect-video bg-muted-gray bg-opacity-20 rounded-lg flex items-center justify-center relative overflow-hidden"
+                  >
+                    <div id={`remote-video-${remoteUser.uid}`} className="w-full h-full" />
+                    {!remoteUser.videoTrack && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-primary-black bg-opacity-75">
+                        <Avatar
+                          src={member?.photoURL}
+                          name={member?.displayName}
+                          size="lg"
+                        />
+                      </div>
+                    )}
+                    <div className="absolute bottom-2 left-2 bg-primary-black bg-opacity-75 px-2 py-1 rounded text-white text-xs md:text-sm truncate max-w-[80%]">
+                      {member?.displayName || 'User'}
+                      {!remoteUser.audioTrack && ' (Muted)'}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Empty slots */}
+              {Array.from({ length: Math.max(0, 4 - remoteUsers.length - 1) }).map((_, i) => (
+                <div
+                  key={`empty-${i}`}
+                  className="aspect-video bg-muted-gray bg-opacity-10 rounded-lg flex items-center justify-center border-2 border-dashed border-muted-gray border-opacity-30"
+                >
+                  <Users className="w-8 h-8 text-muted-gray opacity-50" />
                 </div>
               ))}
             </div>
 
             {/* Call Controls */}
-            <div className="flex justify-center space-x-4 mt-6">
+            <div className="flex justify-center space-x-2 md:space-x-4 mt-4 md:mt-6">
               <button
-                onClick={() => setIsMuted(!isMuted)}
-                className={`p-4 rounded-full transition-colors ${
+                onClick={toggleMic}
+                className={`p-3 md:p-4 rounded-full transition-colors ${
                   isMuted
                     ? 'bg-warning-red text-white'
                     : 'bg-white text-primary-black hover:bg-light-cream'
                 }`}
+                title={isMuted ? 'Unmute' : 'Mute'}
               >
-                {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
+                {isMuted ? <MicOff size={20} className="md:w-6 md:h-6" /> : <Mic size={20} className="md:w-6 md:h-6" />}
               </button>
               <button
-                onClick={() => setIsVideoOff(!isVideoOff)}
-                className={`p-4 rounded-full transition-colors ${
+                onClick={toggleVideo}
+                className={`p-3 md:p-4 rounded-full transition-colors ${
                   isVideoOff
                     ? 'bg-warning-red text-white'
                     : 'bg-white text-primary-black hover:bg-light-cream'
                 }`}
+                title={isVideoOff ? 'Turn on camera' : 'Turn off camera'}
               >
-                {isVideoOff ? <VideoOff size={24} /> : <Video size={24} />}
+                {isVideoOff ? <VideoOff size={20} className="md:w-6 md:h-6" /> : <Video size={20} className="md:w-6 md:h-6" />}
               </button>
               <button
-                className="p-4 rounded-full bg-white text-primary-black hover:bg-light-cream transition-colors"
+                className="p-3 md:p-4 rounded-full bg-white text-primary-black hover:bg-light-cream transition-colors"
+                title="Share screen"
               >
-                <Share2 size={24} />
+                <Share2 size={20} className="md:w-6 md:h-6" />
               </button>
               <button
                 onClick={handleEndCall}
-                className="p-4 rounded-full bg-warning-red text-white hover:bg-red-600 transition-colors"
+                className="p-3 md:p-4 rounded-full bg-warning-red text-white hover:bg-red-600 transition-colors"
+                title="End call"
               >
-                <Phone size={24} className="rotate-135" />
+                <Phone size={20} className="md:w-6 md:h-6 rotate-135" />
               </button>
             </div>
+
+            {/* Call Status */}
+            {joining && (
+              <div className="text-center mt-4">
+                <p className="text-white text-sm">Joining call...</p>
+              </div>
+            )}
+            {callError && (
+              <div className="text-center mt-4">
+                <p className="text-warning-red text-sm">Error: {callError}</p>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* Main Content */}
-      <div className="flex-1 container-app py-6 flex gap-6">
+      <div className="flex-1 container-app py-4 md:py-6 flex flex-col lg:flex-row gap-4 md:gap-6 overflow-hidden">
         {/* Chat/Content Area */}
-        <div className="flex-1 flex flex-col">
-          <Card className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0">
+          <Card className="flex-1 flex flex-col min-h-0">
             {/* Tabs */}
-            <div className="flex space-x-2 border-b border-muted-gray border-opacity-20 px-6 pt-4">
+            <div className="flex space-x-2 border-b border-muted-gray border-opacity-20 px-4 md:px-6 pt-4">
               <button
                 onClick={() => setActiveTab('chat')}
-                className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                className={`px-3 md:px-4 py-2 font-medium transition-colors border-b-2 text-sm md:text-base ${
                   activeTab === 'chat'
                     ? 'border-vibrant-orange text-vibrant-orange'
                     : 'border-transparent text-muted-gray hover:text-primary-black'
@@ -336,78 +477,90 @@ const RoomPage = () => {
               </button>
               <button
                 onClick={() => setActiveTab('resources')}
-                className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                className={`px-3 md:px-4 py-2 font-medium transition-colors border-b-2 text-sm md:text-base ${
                   activeTab === 'resources'
                     ? 'border-vibrant-orange text-vibrant-orange'
                     : 'border-transparent text-muted-gray hover:text-primary-black'
                 }`}
               >
-                Resources
+                <FileText className="w-4 h-4 inline-block mr-2" />
+                Resources ({resources.length})
               </button>
             </div>
 
             {/* Chat Messages */}
             {activeTab === 'chat' && (
               <>
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                  {messages.map((msg) => {
-                    const isOwn = msg.userId === user.uid;
-                    
-                    return (
-                      <motion.div
-                        key={msg.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div className={`flex space-x-3 max-w-md ${isOwn ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                          <Avatar
-                            src={msg.userAvatar}
-                            name={msg.userName}
-                            size="sm"
-                          />
-                          <div>
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span className="text-sm font-medium text-primary-black">
-                                {msg.userName}
-                              </span>
-                              <span className="text-xs text-muted-gray">
-                                {formatTime(msg.timestamp)}
-                              </span>
-                            </div>
-                            <div
-                              className={`px-4 py-2 rounded-lg ${
-                                isOwn
-                                  ? 'bg-vibrant-orange text-white'
-                                  : 'bg-light-cream text-primary-black'
-                              }`}
-                            >
-                              {msg.text}
+                <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-3 md:space-y-4">
+                  {messages.length === 0 ? (
+                    <div className="text-center py-8 md:py-12 text-muted-gray">
+                      <MessageCircle className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 opacity-50" />
+                      <p>No messages yet. Start the conversation!</p>
+                    </div>
+                  ) : (
+                    messages.map((msg) => {
+                      const isOwn = msg.userId === user.uid;
+                      
+                      return (
+                        <motion.div
+                          key={msg.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div className={`flex space-x-2 md:space-x-3 max-w-[85%] md:max-w-md ${isOwn ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                            <Avatar
+                              src={msg.userAvatar}
+                              name={msg.userName}
+                              size="sm"
+                              className="flex-shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <span className="text-xs md:text-sm font-medium text-primary-black truncate">
+                                  {msg.userName}
+                                </span>
+                                <span className="text-xs text-muted-gray flex-shrink-0">
+                                  {msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                              <div
+                                className={`px-3 md:px-4 py-2 rounded-lg break-words text-sm md:text-base ${
+                                  isOwn
+                                    ? 'bg-vibrant-orange text-white'
+                                    : 'bg-light-cream text-primary-black'
+                                }`}
+                              >
+                                {msg.text}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
+                        </motion.div>
+                      );
+                    })
+                  )}
                   <div ref={messagesEndRef} />
                 </div>
 
                 {/* Message Input */}
-                <div className="p-4 border-t border-muted-gray border-opacity-20">
+                <div className="p-3 md:p-4 border-t border-muted-gray border-opacity-20">
                   <div className="flex space-x-2">
                     <Input
                       placeholder="Type a message..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                      disabled={sending}
+                      className="flex-1"
                     />
                     <Button
                       variant="primary"
                       leftIcon={<Send size={18} />}
                       onClick={handleSendMessage}
-                      disabled={!message.trim()}
+                      disabled={!message.trim() || sending}
+                      className="flex-shrink-0"
                     >
-                      Send
+                      <span className="hidden sm:inline">Send</span>
                     </Button>
                   </div>
                 </div>
@@ -416,32 +569,101 @@ const RoomPage = () => {
 
             {/* Resources Tab */}
             {activeTab === 'resources' && (
-              <div className="flex-1 p-6">
-                <div className="text-center py-12 text-muted-gray">
-                  <Share2 className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                  <p className="mb-2">No resources yet</p>
-                  <p className="text-sm">
-                    Share files, links, and study materials with your group
-                  </p>
-                  <Button variant="primary" className="mt-4" leftIcon={<UserPlus size={18} />}>
-                    Upload Resource
-                  </Button>
-                </div>
+              <div className="flex-1 p-4 md:p-6 overflow-y-auto">
+                {resources.length === 0 ? (
+                  <div className="text-center py-8 md:py-12 text-muted-gray">
+                    <Share2 className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 opacity-50" />
+                    <p className="mb-2">No resources yet</p>
+                    <p className="text-xs md:text-sm mb-4">
+                      Share files, links, and study materials with your group
+                    </p>
+                    <Button 
+                      variant="primary" 
+                      leftIcon={<Upload size={18} />}
+                      onClick={() => setShowUploadModal(true)}
+                    >
+                      Upload Resource
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-semibold text-primary-black">
+                        Shared Resources
+                      </h3>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        leftIcon={<Upload size={16} />}
+                        onClick={() => setShowUploadModal(true)}
+                      >
+                        <span className="hidden sm:inline">Upload</span>
+                      </Button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {resources.map((resource) => (
+                        <motion.div
+                          key={resource.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex items-center space-x-3 p-3 md:p-4 rounded-lg border border-muted-gray border-opacity-20 hover:border-opacity-40 transition-colors"
+                        >
+                          <div className="text-2xl md:text-3xl flex-shrink-0">
+                            {getFileIcon(resource.fileType)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-primary-black truncate text-sm md:text-base">
+                              {resource.fileName}
+                            </p>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <span className="text-xs text-muted-gray">
+                                {formatFileSize(resource.fileSize)}
+                              </span>
+                              <span className="text-xs text-muted-gray">•</span>
+                              <span className="text-xs text-muted-gray truncate">
+                                {resource.userName}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex space-x-2 flex-shrink-0">
+                            <a
+                              href={resource.downloadURL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-2 hover:bg-light-cream rounded-lg transition-colors"
+                            >
+                              <Download size={18} className="text-info-blue" />
+                            </a>
+                            {resource.userId === user.uid && (
+                              <button
+                                onClick={() => handleDeleteResource(resource)}
+                                className="p-2 hover:bg-warning-red hover:bg-opacity-10 rounded-lg transition-colors"
+                              >
+                                <Trash2 size={18} className="text-warning-red" />
+                              </button>
+                            )}
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </Card>
         </div>
 
-        {/* Members Sidebar */}
-        <div className="w-80">
-          <Card>
+        {/* Members Sidebar - Hidden on mobile, shown on large screens */}
+        <div className="hidden lg:block w-80 flex-shrink-0">
+          <Card className="h-full flex flex-col">
             <div className="p-4 border-b border-muted-gray border-opacity-20">
               <h3 className="font-semibold text-primary-black flex items-center">
                 <Users className="w-5 h-5 mr-2" />
                 Members ({members.length})
               </h3>
             </div>
-            <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
+            <div className="flex-1 p-4 space-y-3 overflow-y-auto">
               {members.map((member) => (
                 <div
                   key={member.uid}
@@ -454,7 +676,7 @@ const RoomPage = () => {
                     online
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-primary-black truncate">
+                    <p className="font-medium text-primary-black truncate text-sm">
                       {member.displayName}
                       {member.uid === user.uid && ' (You)'}
                     </p>
@@ -514,6 +736,89 @@ const RoomPage = () => {
           </Card>
         </div>
       </div>
+
+      {/* Upload Modal */}
+      <AnimatePresence>
+        {showUploadModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-primary-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => !uploading && setShowUploadModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl shadow-card-xl max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-primary-black">
+                    Upload Resource
+                  </h2>
+                  {!uploading && (
+                    <button
+                      onClick={() => setShowUploadModal(false)}
+                      className="p-2 hover:bg-light-cream rounded-lg transition-colors"
+                    >
+                      <X size={20} />
+                    </button>
+                  )}
+                </div>
+
+                {uploading ? (
+                  <div className="text-center py-8">
+                    <LoadingSpinner size="lg" />
+                    <p className="text-muted-gray mt-4">Uploading... {uploadProgress}%</p>
+                    <div className="w-full bg-light-cream rounded-full h-2 mt-4">
+                      <div
+                        className="bg-vibrant-orange h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-muted-gray border-opacity-30 rounded-lg p-8 text-center cursor-pointer hover:border-vibrant-orange hover:border-opacity-50 transition-colors"
+                    >
+                      <Upload className="w-12 h-12 mx-auto mb-4 text-muted-gray" />
+                      <p className="text-primary-black font-medium mb-2">
+                        Click to upload or drag and drop
+                      </p>
+                      <p className="text-sm text-muted-gray">
+                        Max file size: 50MB
+                      </p>
+                    </div>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      accept="*/*"
+                    />
+
+                    <div className="mt-6 flex space-x-3">
+                      <Button
+                        variant="ghost"
+                        className="flex-1"
+                        onClick={() => setShowUploadModal(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
