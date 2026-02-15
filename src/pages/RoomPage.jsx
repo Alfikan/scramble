@@ -9,7 +9,6 @@ import {
   LogOut,
   UserPlus,
   ArrowLeft,
-  Phone,
   Mic,
   MicOff,
   VideoOff,
@@ -20,6 +19,7 @@ import {
   X,
   Menu,
   FileText,
+  Phone
 } from 'lucide-react';
 
 import Button from '../components/common/Button';
@@ -33,7 +33,7 @@ import { getRoomById, leaveRoom } from '../services/roomService';
 import { getUserProfile } from '../services/userService';
 import { useChat } from '../hooks/useChat';
 import { useResources } from '../hooks/useResources';
-import { useAgora } from '../hooks/useAgora';
+import { useGoogleMeet } from '../hooks/useGoogleMeet';
 import { formatFileSize, getFileIcon } from '../services/resourceService';
 
 /**
@@ -46,7 +46,6 @@ const RoomPage = () => {
   const { user } = useAuth();
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
-  const localVideoRef = useRef(null);
 
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -66,20 +65,17 @@ const RoomPage = () => {
     deleteResource: deleteResourceFile 
   } = useResources(roomId);
   
-  // Agora video calling
+  // Google Meet video calling
   const {
+    meetLink,
     inCall,
-    isMuted,
-    isVideoOff,
-    remoteUsers,
-    joining,
+    loading: joining,
     error: callError,
     startCall,
     endCall,
-    toggleMic,
-    toggleVideo,
-    playLocal
-  } = useAgora(roomId, user?.uid);
+    openMeetWindow,
+    copyMeetLink,
+  } = useGoogleMeet(roomId, room?.name);
 
   useEffect(() => {
     const fetchRoomData = async () => {
@@ -121,22 +117,6 @@ const RoomPage = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Play remote videos when users join
-  useEffect(() => {
-    remoteUsers.forEach((remoteUser) => {
-      if (remoteUser.videoTrack) {
-        const containerId = `remote-video-${remoteUser.uid}`;
-        const container = document.getElementById(containerId);
-        if (container) {
-          remoteUser.videoTrack.play(containerId);
-        }
-      }
-      if (remoteUser.audioTrack) {
-        remoteUser.audioTrack.play();
-      }
-    });
-  }, [remoteUsers]);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -162,17 +142,19 @@ const RoomPage = () => {
   };
 
   const handleStartCall = async () => {
-    await startCall();
-    // Play local video after joining
-    setTimeout(() => {
-      if (localVideoRef.current) {
-        playLocal('local-video');
-      }
-    }, 1000);
+    // Use simple Meet link (no Google auth required)
+    await startCall(true);
   };
 
   const handleEndCall = async () => {
     await endCall();
+  };
+
+  const handleCopyMeetLink = async () => {
+    const copied = await copyMeetLink();
+    if (copied) {
+      alert('Meet link copied to clipboard!');
+    }
   };
 
   const handleFileSelect = async (event) => {
@@ -342,113 +324,73 @@ const RoomPage = () => {
         </div>
       </div>
 
-      {/* Video Call Area */}
-      {inCall && (
+      {/* Google Meet Call Area */}
+      {inCall && meetLink && (
         <div className="bg-primary-black">
           <div className="container-app py-4 md:py-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-4">
-              {/* Local Video */}
-              <div className="aspect-video bg-muted-gray bg-opacity-20 rounded-lg flex items-center justify-center relative overflow-hidden">
-                <div id="local-video" ref={localVideoRef} className="w-full h-full" />
-                {isVideoOff && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-primary-black bg-opacity-75">
-                    <Avatar
-                      src={user?.photoURL}
-                      name={user?.displayName}
-                      size="lg"
-                    />
+            <Card className="p-6 text-center">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-vibrant-orange to-soft-purple rounded-full flex items-center justify-center">
+                  <Video className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-primary-black mb-2">
+                    Google Meet Active
+                  </h3>
+                  <p className="text-muted-gray mb-4">
+                    The meeting is open in a new window. Share the link with others to join.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+                  <Button
+                    variant="primary"
+                    className="flex-1"
+                    leftIcon={<Video size={18} />}
+                    onClick={openMeetWindow}
+                  >
+                    Open Meet
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="flex-1"
+                    leftIcon={<Share2 size={18} />}
+                    onClick={handleCopyMeetLink}
+                  >
+                    Copy Link
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="flex-1 text-warning-red"
+                    leftIcon={<Phone size={18} />}
+                    onClick={handleEndCall}
+                  >
+                    End Call
+                  </Button>
+                </div>
+
+                <div className="w-full max-w-md">
+                  <div className="bg-light-cream rounded-lg p-3 text-left">
+                    <p className="text-xs text-muted-gray mb-1">Meeting Link:</p>
+                    <p className="text-sm text-primary-black break-all font-mono">
+                      {meetLink}
+                    </p>
                   </div>
-                )}
-                <div className="absolute bottom-2 left-2 bg-primary-black bg-opacity-75 px-2 py-1 rounded text-white text-xs md:text-sm truncate max-w-[80%]">
-                  You {isMuted && '(Muted)'}
                 </div>
               </div>
-
-              {/* Remote Users */}
-              {remoteUsers.map((remoteUser) => {
-                const member = members.find(m => m.uid === remoteUser.uid);
-                return (
-                  <div
-                    key={remoteUser.uid}
-                    className="aspect-video bg-muted-gray bg-opacity-20 rounded-lg flex items-center justify-center relative overflow-hidden"
-                  >
-                    <div id={`remote-video-${remoteUser.uid}`} className="w-full h-full" />
-                    {!remoteUser.videoTrack && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-primary-black bg-opacity-75">
-                        <Avatar
-                          src={member?.photoURL}
-                          name={member?.displayName}
-                          size="lg"
-                        />
-                      </div>
-                    )}
-                    <div className="absolute bottom-2 left-2 bg-primary-black bg-opacity-75 px-2 py-1 rounded text-white text-xs md:text-sm truncate max-w-[80%]">
-                      {member?.displayName || 'User'}
-                      {!remoteUser.audioTrack && ' (Muted)'}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Empty slots */}
-              {Array.from({ length: Math.max(0, 4 - remoteUsers.length - 1) }).map((_, i) => (
-                <div
-                  key={`empty-${i}`}
-                  className="aspect-video bg-muted-gray bg-opacity-10 rounded-lg flex items-center justify-center border-2 border-dashed border-muted-gray border-opacity-30"
-                >
-                  <Users className="w-8 h-8 text-muted-gray opacity-50" />
-                </div>
-              ))}
-            </div>
-
-            {/* Call Controls */}
-            <div className="flex justify-center space-x-2 md:space-x-4 mt-4 md:mt-6">
-              <button
-                onClick={toggleMic}
-                className={`p-3 md:p-4 rounded-full transition-colors ${
-                  isMuted
-                    ? 'bg-warning-red text-white'
-                    : 'bg-white text-primary-black hover:bg-light-cream'
-                }`}
-                title={isMuted ? 'Unmute' : 'Mute'}
-              >
-                {isMuted ? <MicOff size={20} className="md:w-6 md:h-6" /> : <Mic size={20} className="md:w-6 md:h-6" />}
-              </button>
-              <button
-                onClick={toggleVideo}
-                className={`p-3 md:p-4 rounded-full transition-colors ${
-                  isVideoOff
-                    ? 'bg-warning-red text-white'
-                    : 'bg-white text-primary-black hover:bg-light-cream'
-                }`}
-                title={isVideoOff ? 'Turn on camera' : 'Turn off camera'}
-              >
-                {isVideoOff ? <VideoOff size={20} className="md:w-6 md:h-6" /> : <Video size={20} className="md:w-6 md:h-6" />}
-              </button>
-              <button
-                className="p-3 md:p-4 rounded-full bg-white text-primary-black hover:bg-light-cream transition-colors"
-                title="Share screen"
-              >
-                <Share2 size={20} className="md:w-6 md:h-6" />
-              </button>
-              <button
-                onClick={handleEndCall}
-                className="p-3 md:p-4 rounded-full bg-warning-red text-white hover:bg-red-600 transition-colors"
-                title="End call"
-              >
-                <Phone size={20} className="md:w-6 md:h-6 rotate-135" />
-              </button>
-            </div>
+            </Card>
 
             {/* Call Status */}
             {joining && (
               <div className="text-center mt-4">
-                <p className="text-white text-sm">Joining call...</p>
+                <p className="text-white text-sm">Creating meeting...</p>
               </div>
             )}
             {callError && (
               <div className="text-center mt-4">
-                <p className="text-warning-red text-sm">Error: {callError}</p>
+                <Card className="p-4 bg-warning-red bg-opacity-10">
+                  <p className="text-warning-red text-sm">Error: {callError}</p>
+                </Card>
               </div>
             )}
           </div>
