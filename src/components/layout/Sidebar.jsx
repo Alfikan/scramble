@@ -69,17 +69,22 @@ const Sidebar = ({ onNavigate, isMobile = false }) => {
       name: 'Leaderboard',
       icon: Trophy,
       path: '/leaderboard',
-      badge: 'Soon',
+      badge: null,
     },
     {
       name: 'Messages',
       icon: MessageSquare,
       path: '/messages',
-      badge: 'Soon',
+      badge: null,
     },
   ];
 
   const bottomItems = [
+    {
+      name: 'Notifications',
+      icon: Bell,
+      path: '/notifications',
+    },
     {
       name: 'Profile',
       icon: User,

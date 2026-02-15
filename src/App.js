@@ -14,6 +14,10 @@ import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import AIChatPage from './pages/AIChatPage';
 import AIQuizPage from './pages/AIQuizPage';
+import LeaderboardPage from './pages/LeaderboardPage';
+import MessagesPage from './pages/MessagesPage';
+import NotificationsPage from './pages/NotificationsPage';
+import HelpPage from './pages/HelpPage';
 
 // Import components
 import LoadingSpinner from './components/common/LoadingSpinner';
@@ -242,6 +246,46 @@ function App() {
                         <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <AIQuizPage />
+                          </AnimatedRoute>
+                        </ProtectedRouteWithLayout>
+                      } 
+                    />
+                    <Route 
+                      path="/leaderboard" 
+                      element={
+                        <ProtectedRouteWithLayout>
+                          <AnimatedRoute>
+                            <LeaderboardPage />
+                          </AnimatedRoute>
+                        </ProtectedRouteWithLayout>
+                      } 
+                    />
+                    <Route 
+                      path="/messages" 
+                      element={
+                        <ProtectedRouteWithLayout>
+                          <AnimatedRoute>
+                            <MessagesPage />
+                          </AnimatedRoute>
+                        </ProtectedRouteWithLayout>
+                      } 
+                    />
+                    <Route 
+                      path="/notifications" 
+                      element={
+                        <ProtectedRouteWithLayout>
+                          <AnimatedRoute>
+                            <NotificationsPage />
+                          </AnimatedRoute>
+                        </ProtectedRouteWithLayout>
+                      } 
+                    />
+                    <Route 
+                      path="/help" 
+                      element={
+                        <ProtectedRouteWithLayout>
+                          <AnimatedRoute>
+                            <HelpPage />
                           </AnimatedRoute>
                         </ProtectedRouteWithLayout>
                       } 

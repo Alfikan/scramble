@@ -9,6 +9,7 @@ import {
   LogOut,
   UserPlus,
   ArrowLeft,
+  Phone,
   Mic,
   MicOff,
   VideoOff,
@@ -33,7 +34,7 @@ import { getRoomById, leaveRoom } from '../services/roomService';
 import { getUserProfile } from '../services/userService';
 import { useChat } from '../hooks/useChat';
 import { useResources } from '../hooks/useResources';
-import { useGoogleMeet } from '../hooks/useGoogleMeet';
+import { useJitsi } from '../hooks/useJitsi';
 import { formatFileSize, getFileIcon } from '../services/resourceService';
 
 /**
@@ -65,17 +66,24 @@ const RoomPage = () => {
     deleteResource: deleteResourceFile 
   } = useResources(roomId);
   
-  // Google Meet video calling
+  // Jitsi Meet video calling
   const {
-    meetLink,
     inCall,
+    isMuted,
+    isVideoOff,
+    participantCount,
     loading: joining,
     error: callError,
     startCall,
     endCall,
-    openMeetWindow,
-    copyMeetLink,
-  } = useGoogleMeet(roomId, room?.name);
+    toggleMic,
+    toggleVideo,
+    shareScreen,
+    copyMeetingLink,
+  } = useJitsi(roomId, {
+    displayName: user?.displayName || 'Student',
+    email: user?.email || '',
+  });
 
   useEffect(() => {
     const fetchRoomData = async () => {
@@ -142,8 +150,7 @@ const RoomPage = () => {
   };
 
   const handleStartCall = async () => {
-    // Use simple Meet link (no Google auth required)
-    await startCall(true);
+    await startCall();
   };
 
   const handleEndCall = async () => {
@@ -151,9 +158,9 @@ const RoomPage = () => {
   };
 
   const handleCopyMeetLink = async () => {
-    const copied = await copyMeetLink();
+    const copied = await copyMeetingLink();
     if (copied) {
-      alert('Meet link copied to clipboard!');
+      alert('Meeting link copied to clipboard!');
     }
   };
 
@@ -324,66 +331,75 @@ const RoomPage = () => {
         </div>
       </div>
 
-      {/* Google Meet Call Area */}
-      {inCall && meetLink && (
+      {/* Jitsi Meet Video Call Area */}
+      {inCall && (
         <div className="bg-primary-black">
           <div className="container-app py-4 md:py-8">
-            <Card className="p-6 text-center">
-              <div className="flex flex-col items-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-vibrant-orange to-soft-purple rounded-full flex items-center justify-center">
-                  <Video className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-primary-black mb-2">
-                    Google Meet Active
-                  </h3>
-                  <p className="text-muted-gray mb-4">
-                    The meeting is open in a new window. Share the link with others to join.
-                  </p>
-                </div>
+            {/* Jitsi Container */}
+            <div 
+              id="jitsi-container" 
+              className="w-full rounded-lg overflow-hidden"
+              style={{ height: '600px' }}
+            />
 
-                <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
-                  <Button
-                    variant="primary"
-                    className="flex-1"
-                    leftIcon={<Video size={18} />}
-                    onClick={openMeetWindow}
-                  >
-                    Open Meet
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="flex-1"
-                    leftIcon={<Share2 size={18} />}
-                    onClick={handleCopyMeetLink}
-                  >
-                    Copy Link
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="flex-1 text-warning-red"
-                    leftIcon={<Phone size={18} />}
-                    onClick={handleEndCall}
-                  >
-                    End Call
-                  </Button>
-                </div>
+            {/* Call Controls */}
+            <div className="flex justify-center items-center space-x-2 md:space-x-4 mt-4 md:mt-6">
+              <button
+                onClick={toggleMic}
+                className={`p-3 md:p-4 rounded-full transition-colors ${
+                  isMuted
+                    ? 'bg-warning-red text-white'
+                    : 'bg-white text-primary-black hover:bg-light-cream'
+                }`}
+                title={isMuted ? 'Unmute' : 'Mute'}
+              >
+                {isMuted ? <MicOff size={20} className="md:w-6 md:h-6" /> : <Mic size={20} className="md:w-6 md:h-6" />}
+              </button>
+              <button
+                onClick={toggleVideo}
+                className={`p-3 md:p-4 rounded-full transition-colors ${
+                  isVideoOff
+                    ? 'bg-warning-red text-white'
+                    : 'bg-white text-primary-black hover:bg-light-cream'
+                }`}
+                title={isVideoOff ? 'Turn on camera' : 'Turn off camera'}
+              >
+                {isVideoOff ? <VideoOff size={20} className="md:w-6 md:h-6" /> : <Video size={20} className="md:w-6 md:h-6" />}
+              </button>
+              <button
+                onClick={shareScreen}
+                className="p-3 md:p-4 rounded-full bg-white text-primary-black hover:bg-light-cream transition-colors"
+                title="Share screen"
+              >
+                <Share2 size={20} className="md:w-6 md:h-6" />
+              </button>
+              <button
+                onClick={handleCopyMeetLink}
+                className="p-3 md:p-4 rounded-full bg-info-blue text-white hover:bg-blue-600 transition-colors"
+                title="Copy meeting link"
+              >
+                <Users size={20} className="md:w-6 md:h-6" />
+              </button>
+              <button
+                onClick={handleEndCall}
+                className="p-3 md:p-4 rounded-full bg-warning-red text-white hover:bg-red-600 transition-colors"
+                title="End call"
+              >
+                <Phone size={20} className="md:w-6 md:h-6 rotate-135" />
+              </button>
+            </div>
 
-                <div className="w-full max-w-md">
-                  <div className="bg-light-cream rounded-lg p-3 text-left">
-                    <p className="text-xs text-muted-gray mb-1">Meeting Link:</p>
-                    <p className="text-sm text-primary-black break-all font-mono">
-                      {meetLink}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </Card>
+            {/* Participant Count */}
+            <div className="text-center mt-4">
+              <p className="text-white text-sm">
+                {participantCount} participant{participantCount !== 1 ? 's' : ''} in call
+              </p>
+            </div>
 
             {/* Call Status */}
             {joining && (
               <div className="text-center mt-4">
-                <p className="text-white text-sm">Creating meeting...</p>
+                <p className="text-white text-sm">Joining call...</p>
               </div>
             )}
             {callError && (
