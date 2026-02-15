@@ -87,11 +87,20 @@ module.exports = {
       },
     },
     screens: {
+      'xs': '375px',   // Small mobile
       'sm': '640px',   // Mobile landscape
       'md': '768px',   // Tablet
       'lg': '1024px',  // Desktop
       'xl': '1280px',  // Large desktop
       '2xl': '1536px', // Extra large
+      // Custom breakpoints for specific devices
+      'tablet': '768px',
+      'laptop': '1024px',
+      'desktop': '1280px',
+      // Max-width breakpoints
+      'max-sm': { 'max': '639px' },
+      'max-md': { 'max': '767px' },
+      'max-lg': { 'max': '1023px' },
     },
   },
   plugins: [],

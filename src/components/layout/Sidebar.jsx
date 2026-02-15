@@ -14,7 +14,9 @@ import {
   Bell,
   Trophy,
   MessageSquare,
-  HelpCircle
+  HelpCircle,
+  Bot,
+  Brain
 } from 'lucide-react';
 
 import Avatar from '../common/Avatar';
@@ -24,8 +26,9 @@ import { useAuth } from '../../contexts/AuthContext';
 /**
  * Sidebar Navigation Component
  * Provides navigation between all pages with collapsible functionality
+ * Fully responsive for mobile, tablet, and desktop
  */
-const Sidebar = () => {
+const Sidebar = ({ onNavigate, isMobile = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut } = useAuth();
@@ -49,6 +52,18 @@ const Sidebar = () => {
       icon: Clock,
       path: '/private-space',
       badge: null,
+    },
+    {
+      name: 'AI Assistant',
+      icon: Bot,
+      path: '/ai-chat',
+      badge: 'New',
+    },
+    {
+      name: 'AI Quiz',
+      icon: Brain,
+      path: '/ai-quiz',
+      badge: 'New',
     },
     {
       name: 'Leaderboard',
@@ -84,6 +99,9 @@ const Sidebar = () => {
 
   const handleNavigation = (path) => {
     navigate(path);
+    if (onNavigate) {
+      onNavigate();
+    }
   };
 
   const handleSignOut = async () => {
@@ -100,13 +118,13 @@ const Sidebar = () => {
   return (
     <motion.div
       initial={false}
-      animate={{ width: isCollapsed ? 80 : 280 }}
-      className="h-screen bg-white border-r border-muted-gray border-opacity-20 flex flex-col fixed left-0 top-0 z-40 shadow-sm"
+      animate={{ width: isMobile ? 280 : (isCollapsed ? 80 : 280) }}
+      className="h-screen bg-white border-r border-muted-gray border-opacity-20 flex flex-col fixed left-0 top-0 z-40 shadow-lg overflow-y-auto"
     >
       {/* Header */}
-      <div className="p-4 border-b border-muted-gray border-opacity-20">
+      <div className="p-4 border-b border-muted-gray border-opacity-20 flex-shrink-0">
         <div className="flex items-center justify-between">
-          {!isCollapsed && (
+          {(!isCollapsed || isMobile) && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -120,24 +138,27 @@ const Sidebar = () => {
             </motion.div>
           )}
           
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 hover:bg-light-cream rounded-lg transition-colors"
-          >
-            {isCollapsed ? (
-              <ChevronRight size={20} className="text-muted-gray" />
-            ) : (
-              <ChevronLeft size={20} className="text-muted-gray" />
-            )}
-          </button>
+          {!isMobile && (
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="p-2 hover:bg-light-cream rounded-lg transition-colors touch-target"
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isCollapsed ? (
+                <ChevronRight size={20} className="text-muted-gray" />
+              ) : (
+                <ChevronLeft size={20} className="text-muted-gray" />
+              )}
+            </button>
+          )}
         </div>
       </div>
 
       {/* User Profile Section */}
-      <div className="p-4 border-b border-muted-gray border-opacity-20">
+      <div className="p-4 border-b border-muted-gray border-opacity-20 flex-shrink-0">
         <button
           onClick={() => handleNavigation('/profile')}
-          className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-light-cream transition-colors"
+          className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-light-cream transition-colors touch-target"
         >
           <Avatar
             src={user?.photoURL}
@@ -146,17 +167,17 @@ const Sidebar = () => {
             online
           />
           
-          {!isCollapsed && (
+          {(!isCollapsed || isMobile) && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="flex-1 text-left min-w-0"
             >
-              <p className="font-semibold text-primary-black truncate">
+              <p className="font-semibold text-primary-black truncate text-sm">
                 {user?.displayName || 'User'}
               </p>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 flex-wrap">
                 <Badge variant="info" size="sm">
                   Level {user?.stats?.level || 1}
                 </Badge>
@@ -170,7 +191,7 @@ const Sidebar = () => {
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+      <nav className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin">
         {navigationItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
@@ -180,28 +201,29 @@ const Sidebar = () => {
               key={item.path}
               onClick={() => handleNavigation(item.path)}
               disabled={item.badge === 'Soon'}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors touch-target ${
                 active
-                  ? 'bg-vibrant-orange text-white'
+                  ? 'bg-vibrant-orange text-white shadow-md'
                   : item.badge === 'Soon'
                   ? 'text-muted-gray cursor-not-allowed opacity-50'
-                  : 'text-primary-black hover:bg-light-cream'
+                  : 'text-primary-black hover:bg-light-cream active:bg-light-cream'
               }`}
             >
-              <Icon size={20} />
+              <Icon size={20} className="flex-shrink-0" />
               
-              {!isCollapsed && (
+              {(!isCollapsed || isMobile) && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex-1 flex items-center justify-between"
+                  className="flex-1 flex items-center justify-between min-w-0"
                 >
-                  <span className="font-medium">{item.name}</span>
+                  <span className="font-medium text-sm truncate">{item.name}</span>
                   {item.badge && (
                     <Badge 
                       variant={active ? 'secondary' : 'warning'} 
                       size="sm"
+                      className="flex-shrink-0 ml-2"
                     >
                       {item.badge}
                     </Badge>
@@ -214,7 +236,7 @@ const Sidebar = () => {
       </nav>
 
       {/* Bottom Navigation */}
-      <div className="p-4 border-t border-muted-gray border-opacity-20 space-y-2">
+      <div className="p-4 border-t border-muted-gray border-opacity-20 space-y-2 flex-shrink-0">
         {bottomItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
@@ -223,20 +245,20 @@ const Sidebar = () => {
             <button
               key={item.path}
               onClick={() => handleNavigation(item.path)}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors touch-target ${
                 active
                   ? 'bg-light-cream text-vibrant-orange'
-                  : 'text-muted-gray hover:bg-light-cream hover:text-primary-black'
+                  : 'text-muted-gray hover:bg-light-cream hover:text-primary-black active:bg-light-cream'
               }`}
             >
-              <Icon size={20} />
+              <Icon size={20} className="flex-shrink-0" />
               
-              {!isCollapsed && (
+              {(!isCollapsed || isMobile) && (
                 <motion.span
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="font-medium"
+                  className="font-medium text-sm"
                 >
                   {item.name}
                 </motion.span>
@@ -248,16 +270,16 @@ const Sidebar = () => {
         {/* Sign Out Button */}
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-warning-red hover:bg-warning-red hover:bg-opacity-10 transition-colors"
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-warning-red hover:bg-warning-red hover:bg-opacity-10 transition-colors touch-target active:bg-warning-red active:bg-opacity-20"
         >
-          <LogOut size={20} />
+          <LogOut size={20} className="flex-shrink-0" />
           
-          {!isCollapsed && (
+          {(!isCollapsed || isMobile) && (
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="font-medium"
+              className="font-medium text-sm"
             >
               Sign Out
             </motion.span>

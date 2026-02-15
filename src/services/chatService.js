@@ -1,6 +1,5 @@
 import { 
   collection, 
-  doc, 
   addDoc, 
   query,
   where,
@@ -8,7 +7,6 @@ import {
   limit,
   onSnapshot,
   serverTimestamp,
-  Timestamp
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 

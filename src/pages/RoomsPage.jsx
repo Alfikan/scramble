@@ -133,15 +133,7 @@ const RoomsPage = () => {
             >
               All Rooms ({publicRooms.length})
             </button>
-            <button
-              onClick={() => setActiveTab('my-rooms')}
-              className={`px-4 py-2 font-medium transition-colors border-b-2 ${activeTab === 'my-rooms'
-                  ? 'border-vibrant-orange text-vibrant-orange'
-                  : 'border-transparent text-muted-gray hover:text-primary-black'
-                }`}
-            >
-              My Rooms
-            </button>{user && (
+            {user && (
               <button
                 onClick={() => setActiveTab('my-rooms')}
                 className={`px-4 py-2 font-medium transition-colors border-b-2 ${activeTab === 'my-rooms'

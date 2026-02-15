@@ -12,6 +12,8 @@ import RoomsPage from './pages/RoomsPage';
 import RoomPage from './pages/RoomPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import AIChatPage from './pages/AIChatPage';
+import AIQuizPage from './pages/AIQuizPage';
 
 // Import components
 import LoadingSpinner from './components/common/LoadingSpinner';
@@ -220,6 +222,26 @@ function App() {
                         <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <SettingsPage />
+                          </AnimatedRoute>
+                        </ProtectedRouteWithLayout>
+                      } 
+                    />
+                    <Route 
+                      path="/ai-chat" 
+                      element={
+                        <ProtectedRouteWithLayout>
+                          <AnimatedRoute>
+                            <AIChatPage />
+                          </AnimatedRoute>
+                        </ProtectedRouteWithLayout>
+                      } 
+                    />
+                    <Route 
+                      path="/ai-quiz" 
+                      element={
+                        <ProtectedRouteWithLayout>
+                          <AnimatedRoute>
+                            <AIQuizPage />
                           </AnimatedRoute>
                         </ProtectedRouteWithLayout>
                       } 

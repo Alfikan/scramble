@@ -20,8 +20,6 @@ import {
   X,
   Menu,
   FileText,
-  Image as ImageIcon,
-  Film
 } from 'lucide-react';
 
 import Button from '../components/common/Button';

@@ -173,14 +173,14 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cool-blue-gray">
-      <div className="container-app py-8">
+    <div className="min-h-screen bg-cool-blue-gray pb-safe">
+      <div className="container-app py-4 sm:py-6 md:py-8">
         {/* Welcome Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary-black">
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-black">
             Welcome back, {user?.displayName?.split(' ')[0] || 'Student'}! 👋
           </h1>
-          <p className="text-muted-gray mt-1">
+          <p className="text-sm sm:text-base text-muted-gray mt-1">
             Ready to continue your learning journey?
           </p>
         </div>
@@ -192,25 +192,25 @@ const DashboardPage = () => {
         >
           {/* Quick Stats */}
           <motion.section variants={itemVariants}>
-            <h2 className="text-xl font-semibold text-primary-black mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-primary-black mb-4 md:mb-6">
               Today's Overview
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {quickStats.map((stat, index) => (
-                <Card key={index} hoverable>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-gray mb-1">{stat.label}</p>
-                      <p className="text-2xl font-bold text-primary-black">
+                <Card key={index} hoverable className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between">
+                    <div className="mb-3 sm:mb-0">
+                      <p className="text-xs sm:text-sm text-muted-gray mb-1">{stat.label}</p>
+                      <p className="text-xl sm:text-2xl font-bold text-primary-black">
                         {stat.value}
                       </p>
-                      <p className={`text-sm text-${stat.color} font-medium`}>
+                      <p className={`text-xs sm:text-sm text-${stat.color} font-medium mt-1`}>
                         {stat.change}
                       </p>
                     </div>
-                    <div className={`w-12 h-12 bg-${stat.color} bg-opacity-10 rounded-xl flex items-center justify-center`}>
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-${stat.color} bg-opacity-10 rounded-xl flex items-center justify-center`}>
                       <div className={`text-${stat.color}`}>
-                        {stat.icon}
+                        {React.cloneElement(stat.icon, { className: 'w-5 h-5 sm:w-6 sm:h-6' })}
                       </div>
                     </div>
                   </div>
@@ -333,23 +333,23 @@ const DashboardPage = () => {
 
           {/* Quick Actions */}
           <motion.section variants={itemVariants}>
-            <h2 className="text-xl font-semibold text-primary-black mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-primary-black mb-4 md:mb-6">
               Quick Actions
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               <Card 
                 hoverable 
                 clickable 
-                className="text-center"
+                className="text-center p-4 sm:p-6 touch-target"
                 onClick={() => navigate('/rooms')}
               >
-                <div className="w-16 h-16 bg-soft-purple bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-soft-purple" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-soft-purple bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <Users className="w-6 h-6 sm:w-8 sm:h-8 text-soft-purple" />
                 </div>
-                <h3 className="font-semibold text-primary-black mb-2">
+                <h3 className="text-sm sm:text-base font-semibold text-primary-black mb-1 sm:mb-2">
                   Join Study Room
                 </h3>
-                <p className="text-sm text-muted-gray">
+                <p className="text-xs sm:text-sm text-muted-gray hidden sm:block">
                   Connect with classmates and study together
                 </p>
               </Card>
@@ -357,16 +357,16 @@ const DashboardPage = () => {
               <Card 
                 hoverable 
                 clickable 
-                className="text-center"
+                className="text-center p-4 sm:p-6 touch-target"
                 onClick={() => navigate('/private-space')}
               >
-                <div className="w-16 h-16 bg-warm-yellow bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Clock className="w-8 h-8 text-warm-yellow" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-warm-yellow bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-warm-yellow" />
                 </div>
-                <h3 className="font-semibold text-primary-black mb-2">
+                <h3 className="text-sm sm:text-base font-semibold text-primary-black mb-1 sm:mb-2">
                   Start Timer
                 </h3>
-                <p className="text-sm text-muted-gray">
+                <p className="text-xs sm:text-sm text-muted-gray hidden sm:block">
                   Begin a focused study session
                 </p>
               </Card>
@@ -374,16 +374,16 @@ const DashboardPage = () => {
               <Card 
                 hoverable 
                 clickable 
-                className="text-center"
-                onClick={() => navigate('/private-space')}
+                className="text-center p-4 sm:p-6 touch-target"
+                onClick={() => navigate('/ai-quiz')}
               >
-                <div className="w-16 h-16 bg-vibrant-orange bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Brain className="w-8 h-8 text-vibrant-orange" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-vibrant-orange bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <Brain className="w-6 h-6 sm:w-8 sm:h-8 text-vibrant-orange" />
                 </div>
-                <h3 className="font-semibold text-primary-black mb-2">
+                <h3 className="text-sm sm:text-base font-semibold text-primary-black mb-1 sm:mb-2">
                   Take Quiz
                 </h3>
-                <p className="text-sm text-muted-gray">
+                <p className="text-xs sm:text-sm text-muted-gray hidden sm:block">
                   Test your knowledge with AI-generated questions
                 </p>
               </Card>
@@ -391,17 +391,17 @@ const DashboardPage = () => {
               <Card 
                 hoverable 
                 clickable 
-                className="text-center"
-                onClick={() => navigate('/rooms')}
+                className="text-center p-4 sm:p-6 touch-target"
+                onClick={() => navigate('/ai-chat')}
               >
-                <div className="w-16 h-16 bg-info-blue bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <MessageCircle className="w-8 h-8 text-info-blue" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-info-blue bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 text-info-blue" />
                 </div>
-                <h3 className="font-semibold text-primary-black mb-2">
-                  Ask Question
+                <h3 className="text-sm sm:text-base font-semibold text-primary-black mb-1 sm:mb-2">
+                  Ask AI
                 </h3>
-                <p className="text-sm text-muted-gray">
-                  Get help from your study community
+                <p className="text-xs sm:text-sm text-muted-gray hidden sm:block">
+                  Get help from AI assistant
                 </p>
               </Card>
             </div>

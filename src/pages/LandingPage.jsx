@@ -18,7 +18,6 @@ import {
 
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
-import { useTheme } from '../contexts/ThemeContext';
 
 /**
  * Modern, engaging landing page for Scramble
@@ -124,33 +123,35 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-cool-blue-gray">
       {/* Navigation */}
-      <nav className="container-app py-6">
+      <nav className="container-app py-4 sm:py-6 safe-area-top">
         <div className="flex items-center justify-between">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center space-x-2"
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-vibrant-orange to-soft-purple rounded-xl flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-white" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-vibrant-orange to-soft-purple rounded-xl flex items-center justify-center">
+              <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-primary-black">Scramble</span>
+            <span className="text-xl sm:text-2xl font-bold text-primary-black">Scramble</span>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center space-x-4"
+            className="flex items-center space-x-2 sm:space-x-4"
           >
-           
             <Button
               variant="ghost"
+              size="sm"
               onClick={() => navigate('/auth')}
+              className="hidden sm:inline-flex"
             >
               Sign In
             </Button>
             <Button
               variant="primary"
+              size="sm"
               onClick={() => navigate('/auth')}
             >
               Get Started
@@ -160,7 +161,7 @@ const LandingPage = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="container-app py-20">
+      <section className="container-app py-12 sm:py-16 md:py-20">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -169,7 +170,7 @@ const LandingPage = () => {
         >
           <motion.h1
             variants={itemVariants}
-            className="text-5xl md:text-6xl font-bold text-primary-black mb-6 leading-tight"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-primary-black mb-4 sm:mb-6 leading-tight px-4"
           >
             Study Together,{' '}
             <span className="text-gradient">Achieve Together</span>
@@ -177,7 +178,7 @@ const LandingPage = () => {
 
           <motion.p
             variants={itemVariants}
-            className="text-xl text-muted-gray mb-8 leading-relaxed max-w-2xl mx-auto"
+            className="text-base sm:text-lg md:text-xl text-muted-gray mb-6 sm:mb-8 leading-relaxed max-w-2xl mx-auto px-4"
           >
             Join the modern collaborative study platform where students connect, 
             learn, and excel together. Make studying social, engaging, and effective.
@@ -185,13 +186,14 @@ const LandingPage = () => {
 
           <motion.div
             variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-8 sm:mb-12 px-4"
           >
             <Button
               variant="primary"
               size="lg"
               onClick={() => navigate('/auth')}
               rightIcon={<ArrowRight size={20} />}
+              className="w-full sm:w-auto"
             >
               Start Studying Now
             </Button>
@@ -199,6 +201,7 @@ const LandingPage = () => {
               variant="ghost"
               size="lg"
               leftIcon={<Play size={20} />}
+              className="w-full sm:w-auto"
             >
               Watch Demo
             </Button>
@@ -207,29 +210,29 @@ const LandingPage = () => {
           {/* Hero Image/Animation */}
           <motion.div
             variants={itemVariants}
-            className="relative"
+            className="relative px-4"
           >
-            <div className="bg-gradient-to-br from-vibrant-orange to-soft-purple rounded-2xl p-8 shadow-card-xl">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-white">
+            <div className="bg-gradient-to-br from-vibrant-orange to-soft-purple rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-card-xl">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 text-white">
                 <div className="text-center">
-                  <Users className="w-8 h-8 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">10K+</div>
-                  <div className="text-sm opacity-90">Students</div>
+                  <Users className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2" />
+                  <div className="text-xl sm:text-2xl font-bold">10K+</div>
+                  <div className="text-xs sm:text-sm opacity-90">Students</div>
                 </div>
                 <div className="text-center">
-                  <Brain className="w-8 h-8 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">50K+</div>
-                  <div className="text-sm opacity-90">Quizzes</div>
+                  <Brain className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2" />
+                  <div className="text-xl sm:text-2xl font-bold">50K+</div>
+                  <div className="text-xs sm:text-sm opacity-90">Quizzes</div>
                 </div>
                 <div className="text-center">
-                  <Clock className="w-8 h-8 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">100K+</div>
-                  <div className="text-sm opacity-90">Study Hours</div>
+                  <Clock className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2" />
+                  <div className="text-xl sm:text-2xl font-bold">100K+</div>
+                  <div className="text-xs sm:text-sm opacity-90">Study Hours</div>
                 </div>
                 <div className="text-center">
-                  <Trophy className="w-8 h-8 mx-auto mb-2" />
-                  <div className="text-2xl font-bold">95%</div>
-                  <div className="text-sm opacity-90">Success Rate</div>
+                  <Trophy className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2" />
+                  <div className="text-xl sm:text-2xl font-bold">95%</div>
+                  <div className="text-xs sm:text-sm opacity-90">Success Rate</div>
                 </div>
               </div>
             </div>
@@ -238,23 +241,23 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="container-app py-20">
+      <section className="container-app py-12 sm:py-16 md:py-20">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-12 sm:mb-16 px-4"
         >
           <motion.h2
             variants={itemVariants}
-            className="text-4xl font-bold text-primary-black mb-4"
+            className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-black mb-4"
           >
             Everything You Need to Study Better
           </motion.h2>
           <motion.p
             variants={itemVariants}
-            className="text-xl text-muted-gray max-w-2xl mx-auto"
+            className="text-base sm:text-lg md:text-xl text-muted-gray max-w-2xl mx-auto"
           >
             Powerful features designed to make collaborative learning fun, 
             engaging, and effective for modern students.
@@ -266,20 +269,20 @@ const LandingPage = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8"
         >
           {features.map((feature, index) => (
             <motion.div key={index} variants={itemVariants}>
-              <Card hoverable className="h-full text-center">
-                <div className={`w-16 h-16 bg-${feature.color} bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-4`}>
+              <Card hoverable className="h-full text-center p-4 sm:p-6">
+                <div className={`w-12 h-12 sm:w-16 sm:h-16 bg-${feature.color} bg-opacity-10 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4`}>
                   <div className={`text-${feature.color}`}>
-                    {feature.icon}
+                    {React.cloneElement(feature.icon, { className: 'w-6 h-6 sm:w-8 sm:h-8' })}
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold text-primary-black mb-3">
+                <h3 className="text-lg sm:text-xl font-semibold text-primary-black mb-2 sm:mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-muted-gray leading-relaxed">
+                <p className="text-sm sm:text-base text-muted-gray leading-relaxed">
                   {feature.description}
                 </p>
               </Card>
@@ -463,10 +466,11 @@ const LandingPage = () => {
             <span className="text-xl font-bold text-primary-black">Scramble</span>
           </div>
           <p className="text-muted-gray mb-4">
-            Made with ❤️ by students, for students
+            Made with ❤️ for students
+            <a href="http://github.com.unkown812">~unkown812</a>
           </p>
           <p className="text-sm text-muted-gray">
-            © 2024 Scramble. All rights reserved.
+            © 2026 Scramble. All rights reserved.
           </p>
         </div>
       </footer>
