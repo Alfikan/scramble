@@ -19,9 +19,6 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuth } from '../contexts/AuthContext';
 import { sendMessageToAI, explainConcept } from '../services/aiService';
 
-/**
- * AI Chat Page - Interactive AI study assistant
- */
 const AIChatPage = () => {
   const { user } = useAuth();
   const messagesEndRef = useRef(null);
@@ -29,8 +26,9 @@ const AIChatPage = () => {
     {
       id: 1,
       type: 'ai',
-      text: "Hello! I'm your AI study assistant. I can help you understand concepts, generate quizzes, create flashcards, and answer your study-related questions. How can I help you today?",
+      text: "Hello! I'm your AI study assistant powered by Google Gemini. I can help you understand concepts, generate quizzes, create flashcards, and answer your study-related questions. How can I help you today?",
       timestamp: new Date(),
+      source: 'system',
     },
   ]);
   const [inputMessage, setInputMessage] = useState('');
@@ -64,19 +62,44 @@ const AIChatPage = () => {
     setInputMessage('');
     setIsTyping(true);
 
-    // Get AI response
-    const response = await sendMessageToAI(inputMessage, messages);
+    try {
+      // Get AI response with conversation history
+      const response = await sendMessageToAI(inputMessage, messages);
 
-    setIsTyping(false);
+      setIsTyping(false);
 
-    if (response.success) {
-      const aiMessage = {
+      if (response.success) {
+        const aiMessage = {
+          id: Date.now() + 1,
+          type: 'ai',
+          text: response.message,
+          timestamp: response.timestamp,
+          source: response.source,
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+      } else {
+        // Show error message
+        const errorMessage = {
+          id: Date.now() + 1,
+          type: 'ai',
+          text: 'Sorry, I encountered an error. Please try again.',
+          timestamp: new Date(),
+          isError: true,
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setIsTyping(false);
+      
+      const errorMessage = {
         id: Date.now() + 1,
         type: 'ai',
-        text: response.message,
-        timestamp: response.timestamp,
+        text: 'Sorry, something went wrong. Please try again.',
+        timestamp: new Date(),
+        isError: true,
       };
-      setMessages((prev) => [...prev, aiMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     }
   };
 
@@ -178,17 +201,32 @@ const AIChatPage = () => {
                         className={`px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm md:text-base ${
                           message.type === 'user'
                             ? 'bg-vibrant-orange text-white'
+                            : message.isError
+                            ? 'bg-warning-red bg-opacity-10 text-warning-red border border-warning-red'
                             : 'bg-light-cream text-primary-black'
                         }`}
                       >
                         {message.text}
                       </div>
-                      <p className="text-xs text-muted-gray mt-1 px-1">
-                        {message.timestamp.toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </p>
+                      <div className="flex items-center space-x-2 mt-1 px-1">
+                        <p className="text-xs text-muted-gray">
+                          {message.timestamp.toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                        {message.source === 'gemini' && (
+                          <span className="text-xs text-success-green flex items-center">
+                            <Sparkles size={10} className="mr-1" />
+                            AI
+                          </span>
+                        )}
+                        {message.source === 'fallback' && (
+                          <span className="text-xs text-muted-gray">
+                            Fallback
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -204,8 +242,9 @@ const AIChatPage = () => {
                     <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-vibrant-orange to-soft-purple flex items-center justify-center">
                       <Bot className="w-4 h-4 md:w-5 md:h-5 text-white" />
                     </div>
-                    <div className="bg-light-cream px-4 py-3 rounded-lg">
+                    <div className="bg-light-cream px-4 py-3 rounded-lg flex items-center space-x-2">
                       <LoadingSpinner size="sm" />
+                      <span className="text-sm text-muted-gray">Thinking...</span>
                     </div>
                   </div>
                 </motion.div>

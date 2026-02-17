@@ -7,6 +7,7 @@
     "@capacitor/android": "^8.0.2",
     "@capacitor/core": "^8.0.2",
     "@capacitor/ios": "^8.0.2",
+    "@google/genai": "^1.41.0",
     "@hookform/resolvers": "^3.10.0",
     "@tanstack/react-query": "^5.62.7",
     "@testing-library/dom": "^10.4.1",
@@ -52,6 +53,11 @@
       "react-app/jest"
     ]
   },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!(fast-check|pure-rand|@google/genai)/)"
+    ]
+  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -72,6 +78,7 @@
     "@electron-forge/maker-zip": "^7.11.1",
     "autoprefixer": "^10.4.20",
     "eslint": "^8.57.1",
+    "fast-check": "^4.5.3",
     "postcss": "^8.5.0",
     "prettier": "^3.4.2",
     "tailwindcss": "^3.4.17"

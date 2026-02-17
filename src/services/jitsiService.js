@@ -1,11 +1,4 @@
-/**
- * Jitsi Meet Service
- * Handles video calling using Jitsi Meet API
- * No authentication required, fully embeddable
- */
-
-const JITSI_DOMAIN = 'meet.jit.si'; // Free Jitsi server
-// For production, you can use your own Jitsi server
+const JITSI_DOMAIN = 'meet.jit.si'; 
 
 let jitsiAPI = null;
 

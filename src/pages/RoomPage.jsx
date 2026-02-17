@@ -20,7 +20,6 @@ import {
   X,
   Menu,
   FileText,
-  Phone
 } from 'lucide-react';
 
 import Button from '../components/common/Button';

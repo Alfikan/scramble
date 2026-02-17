@@ -48,11 +48,7 @@ const PrivateSpacePage = () => {
   const [sessionNotes, setSessionNotes] = useState('');
   
   // Todo state
-  const [todos, setTodos] = useState([
-    { id: 1, text: 'Review Chapter 5', completed: false, priority: 'high' },
-    { id: 2, text: 'Complete Math homework', completed: false, priority: 'medium' },
-    { id: 3, text: 'Prepare for quiz', completed: true, priority: 'high' },
-  ]);
+  const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
 
   const handleStartSession = async () => {
