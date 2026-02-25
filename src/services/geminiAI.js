@@ -1,16 +1,12 @@
-// Google Gemini AI Service with Rate Limit Handling
 import { GoogleGenAI } from '@google/genai';
 
 const GEMINI_KEY = process.env.REACT_APP_GEMINI_API_KEY;
 const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
-// Initialize SDK client
 const ai = GEMINI_KEY ? new GoogleGenAI({ apiKey: GEMINI_KEY }) : null;
-
-// Rate limit tracking
 let rateLimitUntil = null;
 let requestCount = 0;
-const MAX_REQUESTS_PER_MINUTE = 15; // Free tier limit
+const MAX_REQUESTS_PER_MINUTE = 15;
 
 const callGemini = async (prompt, options = {}) => {
   if (!ai) {
@@ -18,14 +14,12 @@ const callGemini = async (prompt, options = {}) => {
     return null;
   }
 
-  // Check if we're rate limited
   if (rateLimitUntil && Date.now() < rateLimitUntil) {
     const waitSeconds = Math.ceil((rateLimitUntil - Date.now()) / 1000);
     console.warn(`Rate limited. Please wait ${waitSeconds} seconds.`);
     return null;
   }
 
-  // Check request count
   if (requestCount >= MAX_REQUESTS_PER_MINUTE) {
     console.warn('Request limit reached. Using fallback responses.');
     return null;
@@ -35,7 +29,7 @@ const callGemini = async (prompt, options = {}) => {
     requestCount++;
     
     const response = await ai.models.generateContent({
-      model: 'gemini-pro',
+      model: 'gemini-2.5-pro',
       contents: prompt,
       generationConfig: {
         temperature: options.temperature || 0.7,
@@ -45,24 +39,20 @@ const callGemini = async (prompt, options = {}) => {
       },
     });
 
-    // Check for blocked content
     if (response.promptFeedback?.blockReason) {
       console.warn(`Content blocked: ${response.promptFeedback.blockReason}`);
       return null;
     }
 
-    // Check for valid response
     if (!response.text) {
       console.warn('No response generated');
       return null;
     }
     
-    // Reset request count after successful request
     setTimeout(() => { requestCount = Math.max(0, requestCount - 1); }, 60000);
     
     return response.text;
   } catch (error) {
-    // Handle quota/rate limit errors
     if (error.message?.includes('quota') || error.status === 429) {
       console.warn('Rate limit exceeded. Using fallback responses.');
       rateLimitUntil = Date.now() + 60000;
@@ -76,18 +66,15 @@ const callGemini = async (prompt, options = {}) => {
 
 const fallback = (msg) => {
   const m = msg.toLowerCase();
-  
-  // Greetings
   if (m.includes('hello') || m.includes('hi') || m.includes('hey')) {
     return "Hello! I'm your AI study assistant. I can help you understand concepts, generate quizzes, and answer your study questions. What would you like to learn about today?";
   }
   
-  // Quiz requests
   if (m.includes('quiz') || m.includes('test') || m.includes('practice')) {
     return "I can help you generate practice quizzes! Just tell me the topic and difficulty level (easy, medium, or hard), and I'll create custom questions for you.";
   }
   
-  // Explanation requests
+
   if (m.includes('explain') || m.includes('what is') || m.includes('how does')) {
     return "I'd be happy to explain that concept! Please provide more details about what you'd like to learn, and I'll break it down into easy-to-understand parts.";
   }
@@ -112,7 +99,6 @@ export const sendMessageToAI = async (message, history = []) => {
   
   const response = await callGemini(prompt);
   
-  // Use fallback if API fails or rate limited
   const finalResponse = response || fallback(message);
   
   return { 
@@ -150,20 +136,60 @@ export const generateQuiz = async (topic, difficulty = 'medium', count = 5) => {
       console.error('Parse error:', e);
     }
   }
-  
-  // Enhanced fallback with better sample questions
   const sampleQuestions = {
     easy: [
-      { q: `What is the basic concept of ${topic}?`, a: 'Fundamental principle', b: 'Advanced theory', c: 'Complex algorithm', d: 'None of the above', correct: 0 },
-      { q: `Which of these relates to ${topic}?`, a: 'Related concept A', b: 'Related concept B', c: 'Unrelated concept', d: 'All of the above', correct: 0 },
+      {
+        q: `What is the basic concept of ${topic}?`,
+        a: "Fundamental principle",
+        b: "Advanced theory",
+        c: "Complex algorithm",
+        d: "None of the above",
+        correct: 0,
+      },
+      {
+        q: `Which of these relates to ${topic}?`,
+        a: "Related concept A",
+        b: "Related concept B",
+        c: "Unrelated concept",
+        d: "All of the above",
+        correct: 0,
+      },
     ],
     medium: [
-      { q: `How does ${topic} work in practice?`, a: 'Through systematic application', b: 'Random process', c: 'No specific method', d: 'Unknown', correct: 0 },
-      { q: `What is an important aspect of ${topic}?`, a: 'Key principle', b: 'Minor detail', c: 'Irrelevant factor', d: 'Optional feature', correct: 0 },
+      {
+        q: `How does ${topic} work in practice?`,
+        a: "Through systematic application",
+        b: "Random process",
+        c: "No specific method",
+        d: "Unknown",
+        correct: 0,
+      },
+      {
+        q: `What is an important aspect of ${topic}?`,
+        a: "Key principle",
+        b: "Minor detail",
+        c: "Irrelevant factor",
+        d: "Optional feature",
+        correct: 0,
+      },
     ],
     hard: [
-      { q: `What are the advanced implications of ${topic}?`, a: 'Complex theoretical framework', b: 'Simple application', c: 'Basic concept', d: 'Elementary principle', correct: 0 },
-      { q: `How does ${topic} integrate with related concepts?`, a: 'Through sophisticated mechanisms', b: 'No integration', c: 'Simple connection', d: 'Random association', correct: 0 },
+      {
+        q: `What are the advanced implications of ${topic}?`,
+        a: "Complex theoretical framework",
+        b: "Simple application",
+        c: "Basic concept",
+        d: "Elementary principle",
+        correct: 0,
+      },
+      {
+        q: `How does ${topic} integrate with related concepts?`,
+        a: "Through sophisticated mechanisms",
+        b: "No integration",
+        c: "Simple connection",
+        d: "Random association",
+        correct: 0,
+      },
     ],
   };
   

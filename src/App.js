@@ -1,49 +1,45 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 
-// Import pages
-import LandingPage from './pages/LandingPage';
-import AuthPage from './pages/AuthPage';
-import DashboardPage from './pages/DashboardPage';
-import PrivateSpacePage from './pages/PrivateSpacePage';
-import RoomsPage from './pages/RoomsPage';
-import RoomPage from './pages/RoomPage';
-import ProfilePage from './pages/ProfilePage';
-import SettingsPage from './pages/SettingsPage';
-import AIChatPage from './pages/AIChatPage';
-import AIQuizPage from './pages/AIQuizPage';
-import LeaderboardPage from './pages/LeaderboardPage';
-import MessagesPage from './pages/MessagesPage';
-import NotificationsPage from './pages/NotificationsPage';
-import HelpPage from './pages/HelpPage';
+import LandingPage from "./pages/LandingPage";
+import AuthPage from "./pages/AuthPage";
+import DashboardPage from "./pages/DashboardPage";
+import PrivateSpacePage from "./pages/PrivateSpacePage";
+import RoomsPage from "./pages/RoomsPage";
+import RoomPage from "./pages/RoomPage";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
+import AIChatPage from "./pages/AIChatPage";
+import AIQuizPage from "./pages/AIQuizPage";
+import LeaderboardPage from "./pages/LeaderboardPage";
+import MessagesPage from "./pages/MessagesPage";
+import NotificationsPage from "./pages/NotificationsPage";
+import HelpPage from "./pages/HelpPage";
+import LoadingSpinner from "./components/common/LoadingSpinner";
+import ErrorBoundary from "./components/common/ErrorBoundary";
+import Layout from "./components/layout/Layout";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
-// Import components
-import LoadingSpinner from './components/common/LoadingSpinner';
-import ErrorBoundary from './components/common/ErrorBoundary';
-import Layout from './components/layout/Layout';
-
-// Import contexts and hooks
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
-
-// Import styles
-import './index.css';
-
-// Create React Query client
+import "./index.css";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 10 * 60 * 1000,
       refetchOnWindowFocus: false,
       retry: 1,
     },
   },
 });
 
-// Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
@@ -56,13 +52,12 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
 };
 
-// Public Route Component (redirect if authenticated)
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
@@ -81,7 +76,6 @@ const PublicRoute = ({ children }) => {
   return children;
 };
 
-// Page transition variants
 const pageVariants = {
   initial: {
     opacity: 0,
@@ -98,12 +92,11 @@ const pageVariants = {
 };
 
 const pageTransition = {
-  type: 'tween',
-  ease: 'anticipate',
+  type: "tween",
+  ease: "anticipate",
   duration: 0.3,
 };
 
-// Animated Route Wrapper
 const AnimatedRoute = ({ children }) => (
   <motion.div
     initial="initial"
@@ -117,7 +110,6 @@ const AnimatedRoute = ({ children }) => (
   </motion.div>
 );
 
-// Protected Route with Layout
 const ProtectedRouteWithLayout = ({ children }) => {
   const { user, loading } = useAuth();
 
@@ -148,152 +140,152 @@ function App() {
                 <AnimatePresence mode="wait">
                   <Routes>
                     {/* Public Routes */}
-                    <Route 
-                      path="/" 
+                    <Route
+                      path="/"
                       element={
                         <PublicRoute>
                           <AnimatedRoute>
                             <LandingPage />
                           </AnimatedRoute>
                         </PublicRoute>
-                      } 
+                      }
                     />
-                    <Route 
-                      path="/auth" 
+                    <Route
+                      path="/auth"
                       element={
                         <PublicRoute>
                           <AnimatedRoute>
                             <AuthPage />
                           </AnimatedRoute>
                         </PublicRoute>
-                      } 
+                      }
                     />
 
                     {/* Protected Routes with Layout */}
-                    <Route 
-                      path="/dashboard" 
+                    <Route
+                      path="/dashboard"
                       element={
                         <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <DashboardPage />
                           </AnimatedRoute>
                         </ProtectedRouteWithLayout>
-                      } 
+                      }
                     />
-                    <Route 
-                      path="/private-space" 
+                    <Route
+                      path="/private-space"
                       element={
                         <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <PrivateSpacePage />
                           </AnimatedRoute>
                         </ProtectedRouteWithLayout>
-                      } 
+                      }
                     />
-                    <Route 
-                      path="/rooms" 
+                    <Route
+                      path="/rooms"
                       element={
                         <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <RoomsPage />
                           </AnimatedRoute>
                         </ProtectedRouteWithLayout>
-                      } 
+                      }
                     />
-                    <Route 
-                      path="/room/:roomId" 
+                    <Route
+                      path="/room/:roomId"
                       element={
                         <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <RoomPage />
                           </AnimatedRoute>
                         </ProtectedRouteWithLayout>
-                      } 
+                      }
                     />
-                    <Route 
-                      path="/profile" 
+                    <Route
+                      path="/profile"
                       element={
                         <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <ProfilePage />
                           </AnimatedRoute>
                         </ProtectedRouteWithLayout>
-                      } 
+                      }
                     />
-                    <Route 
-                      path="/settings" 
+                    <Route
+                      path="/settings"
                       element={
                         <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <SettingsPage />
                           </AnimatedRoute>
                         </ProtectedRouteWithLayout>
-                      } 
+                      }
                     />
-                    <Route 
-                      path="/ai-chat" 
+                    <Route
+                      path="/ai-chat"
                       element={
                         <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <AIChatPage />
                           </AnimatedRoute>
                         </ProtectedRouteWithLayout>
-                      } 
+                      }
                     />
-                    <Route 
-                      path="/ai-quiz" 
+                    <Route
+                      path="/ai-quiz"
                       element={
                         <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <AIQuizPage />
                           </AnimatedRoute>
                         </ProtectedRouteWithLayout>
-                      } 
+                      }
                     />
-                    <Route 
-                      path="/leaderboard" 
+                    <Route
+                      path="/leaderboard"
                       element={
                         <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <LeaderboardPage />
                           </AnimatedRoute>
                         </ProtectedRouteWithLayout>
-                      } 
+                      }
                     />
-                    <Route 
-                      path="/messages" 
+                    <Route
+                      path="/messages"
                       element={
                         <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <MessagesPage />
                           </AnimatedRoute>
                         </ProtectedRouteWithLayout>
-                      } 
+                      }
                     />
-                    <Route 
-                      path="/notifications" 
+                    <Route
+                      path="/notifications"
                       element={
                         <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <NotificationsPage />
                           </AnimatedRoute>
                         </ProtectedRouteWithLayout>
-                      } 
+                      }
                     />
-                    <Route 
-                      path="/help" 
+                    <Route
+                      path="/help"
                       element={
                         <ProtectedRouteWithLayout>
                           <AnimatedRoute>
                             <HelpPage />
                           </AnimatedRoute>
                         </ProtectedRouteWithLayout>
-                      } 
+                      }
                     />
 
                     {/* Catch all route */}
-                    <Route 
-                      path="*" 
+                    <Route
+                      path="*"
                       element={
                         <AnimatedRoute>
                           <div className="min-h-screen flex items-center justify-center bg-cool-blue-gray">
@@ -313,7 +305,7 @@ function App() {
                             </div>
                           </div>
                         </AnimatedRoute>
-                      } 
+                      }
                     />
                   </Routes>
                 </AnimatePresence>

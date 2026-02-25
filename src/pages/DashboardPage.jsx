@@ -18,10 +18,6 @@ import { getUserProfile, getUserStudySessions, getUserQuizAttempts } from '../se
 import { getUserRooms } from '../services/roomService';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
-/**
- * Main dashboard page - overview of user's study activity
- * Shows quick stats, recent activity, and navigation to main features
- */
 const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -38,26 +34,22 @@ const DashboardPage = () => {
       setLoading(true);
       
       try {
-        // Fetch user profile
         const profileResult = await getUserProfile(user.uid);
         if (profileResult.success) {
           setUserProfile(profileResult.user);
         }
 
-        // Fetch user's rooms
         const roomsResult = await getUserRooms(user.uid);
         console.log('Dashboard - Fetched rooms:', roomsResult);
         if (roomsResult.success) {
           setUserRooms(roomsResult.rooms);
         }
 
-        // Fetch recent study sessions
         const sessionsResult = await getUserStudySessions(user.uid, 5);
         if (sessionsResult.success) {
           setRecentSessions(sessionsResult.sessions);
         }
 
-        // Fetch recent quiz attempts
         const quizzesResult = await getUserQuizAttempts(user.uid, 5);
         if (quizzesResult.success) {
           setRecentQuizzes(quizzesResult.attempts);
@@ -81,7 +73,7 @@ const DashboardPage = () => {
   }
 
   const stats = userProfile?.stats || {};
-  const todayStudyTime = '0h 0m'; // TODO: Calculate from today's sessions
+  const todayStudyTime = '0h 0m';
   
   const quickStats = [
     {
@@ -131,8 +123,7 @@ const DashboardPage = () => {
       color: 'warm-yellow',
     })),
   ].sort((a, b) => {
-    // Sort by time (most recent first)
-    return 0; // Simplified for now
+    return b.time.localeCompare(a.time);
   }).slice(0, 4);
 
   // Helper function to format time ago
@@ -175,7 +166,6 @@ const DashboardPage = () => {
   return (
     <div className="min-h-screen bg-cool-blue-gray pb-safe">
       <div className="container-app py-4 sm:py-6 md:py-8">
-        {/* Welcome Header */}
         <div className="mb-6 md:mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-black">
             Welcome back, {user?.displayName?.split(' ')[0] || 'Student'}! 👋
@@ -190,7 +180,6 @@ const DashboardPage = () => {
           animate="visible"
           className="space-y-8"
         >
-          {/* Quick Stats */}
           <motion.section variants={itemVariants}>
             <h2 className="text-lg sm:text-xl font-semibold text-primary-black mb-4 md:mb-6">
               Today's Overview
@@ -220,7 +209,6 @@ const DashboardPage = () => {
           </motion.section>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Recent Activity */}
             <motion.section variants={itemVariants} className="lg:col-span-2">
               <Card>
                 <CardHeader>

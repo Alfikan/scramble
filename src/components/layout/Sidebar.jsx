@@ -1,107 +1,19 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard,
-  Users,
-  Clock,
-  Settings,
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
-  BookOpen,
-  User,
-  Bell,
-  Trophy,
-  MessageSquare,
-  HelpCircle,
-  Bot,
-  Brain
-} from 'lucide-react';
-
+import { bottomItems } from '../../constants/bottomItems';
+import { navigationItems } from '../../constants/navigationItems';
 import Avatar from '../common/Avatar';
 import Badge from '../common/Badge';
 import { useAuth } from '../../contexts/AuthContext';
+import { BookOpen,ChevronRight,ChevronLeft,LogOut } from 'lucide-react';
 
-/**
- * Sidebar Navigation Component
- * Provides navigation between all pages with collapsible functionality
- * Fully responsive for mobile, tablet, and desktop
- */
 const Sidebar = ({ onNavigate, isMobile = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
-
-  const navigationItems = [
-    {
-      name: 'Dashboard',
-      icon: LayoutDashboard,
-      path: '/dashboard',
-      badge: null,
-    },
-    {
-      name: 'Study Rooms',
-      icon: Users,
-      path: '/rooms',
-      badge: null,
-    },
-    {
-      name: 'Private Space',
-      icon: Clock,
-      path: '/private-space',
-      badge: null,
-    },
-    {
-      name: 'AI Assistant',
-      icon: Bot,
-      path: '/ai-chat',
-      badge: 'New',
-    },
-    {
-      name: 'AI Quiz',
-      icon: Brain,
-      path: '/ai-quiz',
-      badge: 'New',
-    },
-    {
-      name: 'Leaderboard',
-      icon: Trophy,
-      path: '/leaderboard',
-      badge: null,
-    },
-    {
-      name: 'Messages',
-      icon: MessageSquare,
-      path: '/messages',
-      badge: null,
-    },
-  ];
-
-  const bottomItems = [
-    {
-      name: 'Notifications',
-      icon: Bell,
-      path: '/notifications',
-    },
-    {
-      name: 'Profile',
-      icon: User,
-      path: '/profile',
-    },
-    {
-      name: 'Settings',
-      icon: Settings,
-      path: '/settings',
-    },
-    {
-      name: 'Help',
-      icon: HelpCircle,
-      path: '/help',
-    },
-  ];
-
+  
   const handleNavigation = (path) => {
     navigate(path);
     if (onNavigate) {
@@ -159,43 +71,6 @@ const Sidebar = ({ onNavigate, isMobile = false }) => {
         </div>
       </div>
 
-      {/* User Profile Section */}
-      <div className="p-4 border-b border-muted-gray border-opacity-20 flex-shrink-0">
-        <button
-          onClick={() => handleNavigation('/profile')}
-          className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-light-cream transition-colors touch-target"
-        >
-          <Avatar
-            src={user?.photoURL}
-            name={user?.displayName}
-            size="md"
-            online
-          />
-          
-          {(!isCollapsed || isMobile) && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex-1 text-left min-w-0"
-            >
-              <p className="font-semibold text-primary-black truncate text-sm">
-                {user?.displayName || 'User'}
-              </p>
-              <div className="flex items-center space-x-2 flex-wrap">
-                <Badge variant="info" size="sm">
-                  Level {user?.stats?.level || 1}
-                </Badge>
-                <span className="text-xs text-muted-gray">
-                  {user?.stats?.xp || 0} XP
-                </span>
-              </div>
-            </motion.div>
-          )}
-        </button>
-      </div>
-
-      {/* Main Navigation */}
       <nav className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin">
         {navigationItems.map((item) => {
           const Icon = item.icon;
@@ -240,7 +115,6 @@ const Sidebar = ({ onNavigate, isMobile = false }) => {
         })}
       </nav>
 
-      {/* Bottom Navigation */}
       <div className="p-4 border-t border-muted-gray border-opacity-20 space-y-2 flex-shrink-0">
         {bottomItems.map((item) => {
           const Icon = item.icon;
@@ -272,7 +146,6 @@ const Sidebar = ({ onNavigate, isMobile = false }) => {
           );
         })}
 
-        {/* Sign Out Button */}
         <button
           onClick={handleSignOut}
           className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-warning-red hover:bg-warning-red hover:bg-opacity-10 transition-colors touch-target active:bg-warning-red active:bg-opacity-20"
@@ -292,7 +165,6 @@ const Sidebar = ({ onNavigate, isMobile = false }) => {
         </button>
       </div>
 
-      {/* Notifications Badge (if collapsed) */}
       {isCollapsed && (
         <div className="absolute top-4 right-2">
           <div className="w-2 h-2 bg-vibrant-orange rounded-full"></div>

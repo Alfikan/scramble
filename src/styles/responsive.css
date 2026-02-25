@@ -1,11 +1,5 @@
-/**
- * Responsive Styles
- * Mobile-first approach with breakpoints for tablet and desktop
- */
-
-/* Mobile First Base Styles (320px - 639px) */
 @media (max-width: 639px) {
-  /* Typography adjustments for mobile */
+
   h1 {
     @apply text-2xl;
   }
