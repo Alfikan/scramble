@@ -1,0 +1,316 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+enum UserLevel {
+  beginner
+  intermediate
+  advanced
+  expert
+}
+
+enum MessageType {
+  text
+  image
+  file
+}
+
+enum OAuthProvider {
+  google
+  email
+}
+
+enum RoomRole {
+  owner
+  admin
+  member
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String?   @map("password_hash")
+  displayName   String?   @map("display_name")
+  photoUrl      String?   @map("photo_url")
+  bio           String    @default("")
+  emailVerified Boolean   @default(false) @map("email_verified")
+  level         UserLevel @default(beginner)
+  firebaseUid   String?   @map("firebase_uid") @unique
+  
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  lastLoginAt DateTime? @map("last_login_at")
+
+  oauthAccounts    OAuthAccount[]
+  refreshTokens    RefreshToken[]
+  userStats        UserStats?
+  studyPreferences StudyPreferences?
+  subjects         UserSubject[]
+  badges           UserBadge[]
+  availability     UserAvailability[]
+  createdRooms     Room[]        @relation("RoomCreator")
+  roomMemberships  RoomMember[]
+  messages         Message[]
+  resources        Resource[]
+  studySessions    StudySession[]
+  quizAttempts     QuizAttempt[]
+
+  @@map("users")
+  @@index([email])
+  @@index([firebaseUid])
+}
+
+model OAuthAccount {
+  id              String        @id @default(uuid())
+  userId          String        @map("user_id")
+  provider        OAuthProvider
+  providerUserId  String        @map("provider_user_id")
+  accessToken     String?       @map("access_token")
+  refreshToken    String?       @map("refresh_token")
+  tokenExpiresAt  DateTime?     @map("token_expires_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@map("oauth_accounts")
+  @@index([userId])
+}
+
+model RefreshToken {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  tokenHash   String    @unique @map("token_hash")
+  deviceInfo  Json?     @map("device_info")
+  expiresAt   DateTime  @map("expires_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  revokedAt   DateTime? @map("revoked_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+  @@index([userId])
+  @@index([tokenHash])
+}
+
+model UserStats {
+  userId              String    @map("user_id") @id
+  totalStudyHours    Decimal   @default(0) @map("total_study_hours") @db.Decimal(10, 2)
+  totalQuizzesTaken  Int       @default(0) @map("total_quizzes_taken")
+  averageQuizScore   Decimal   @default(0) @map("average_quiz_score") @db.Decimal(5, 2)
+  doubtsRaised       Int       @default(0) @map("doubts_raised")
+  doubtsResolved     Int       @default(0) @map("doubts_resolved")
+  meetingsAttended   Int       @default(0) @map("meetings_attended")
+  currentStreak      Int       @default(0) @map("current_streak")
+  longestStreak      Int       @default(0) @map("longest_streak")
+  xp                 Int       @default(0)
+  level              UserLevel @default(beginner)
+  lastStudyDate      DateTime? @map("last_study_date") @db.Date
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_stats")
+  @@index([xp])
+}
+
+model StudyPreferences {
+  userId                  String  @map("user_id") @id
+  focusMusic             Boolean @default(false) @map("focus_music")
+  pomodoroLength         Int     @default(25) @map("pomodoro_length")
+  breakLength            Int     @default(5) @map("break_length")
+  studyGoalHoursPerWeek  Decimal @default(20) @map("study_goal_hours_per_week") @db.Decimal(5, 2)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("study_preferences")
+}
+
+model UserSubject {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  subject   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subject])
+  @@map("user_subjects")
+  @@index([userId])
+}
+
+model UserBadge {
+  id       String   @id @default(uuid())
+  userId   String   @map("user_id")
+  badgeId  String   @map("badge_id")
+  earnedAt DateTime @default(now()) @map("earned_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+  @@index([userId])
+}
+
+model UserAvailability {
+  id          String  @id @default(uuid())
+  userId      String  @map("user_id")
+  dayOfWeek   Int     @map("day_of_week")
+  startHour   Int?    @map("start_hour")
+  endHour     Int?    @map("end_hour")
+  isAvailable Boolean @default(true) @map("is_available")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dayOfWeek])
+  @@map("user_availability")
+  @@index([userId])
+}
+
+model Room {
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+  subject     String?
+  isPublic    Boolean  @default(true) @map("is_public")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdById String   @map("created_by")
+  firebaseId  String?  @map("firebase_id")
+  memberCount Int      @default(0) @map("member_count")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  creator    User          @relation("RoomCreator", fields: [createdById], references: [id])
+  members    RoomMember[]
+  messages   Message[]
+  resources  Resource[]
+  studySessions StudySession[]
+
+  @@map("rooms")
+  @@index([isPublic, isActive])
+  @@index([createdById])
+  @@index([firebaseId])
+}
+
+model RoomMember {
+  id       String   @id @default(uuid())
+  roomId   String   @map("room_id")
+  userId   String   @map("user_id")
+  role     RoomRole @default(member)
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@map("room_members")
+  @@index([roomId])
+  @@index([userId])
+}
+
+model Message {
+  id         String      @id @default(uuid())
+  roomId     String      @map("room_id")
+  userId     String      @map("user_id")
+  userName   String      @map("user_name")
+  userAvatar String?      @map("user_avatar")
+  content    String      @db.Text
+  messageType MessageType @default(text) @map("message_type")
+  edited     Boolean     @default(false)
+  deleted    Boolean     @default(false)
+  firebaseId String?      @map("firebase_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  room  Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user  User @relation(fields: [userId], references: [id])
+
+  @@map("messages")
+  @@index([roomId, createdAt])
+  @@index([firebaseId])
+}
+
+model Resource {
+  id         String   @id @default(uuid())
+  roomId     String   @map("room_id")
+  userId     String   @map("user_id")
+  userName   String   @map("user_name")
+  fileName   String   @map("file_name")
+  fileSize   BigInt   @map("file_size")
+  fileType   String   @map("file_type")
+  storageKey String   @map("storage_key")
+  downloadUrl String? @map("download_url")
+  firebaseId String?  @map("firebase_id")
+
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("resources")
+  @@index([roomId])
+  @@index([firebaseId])
+}
+
+model StudySession {
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  roomId          String?   @map("room_id")
+  subject         String    @default("General")
+  startTime       DateTime  @map("start_time")
+  endTime         DateTime? @map("end_time")
+  durationMinutes Int?      @map("duration_minutes")
+  isActive        Boolean   @default(true) @map("is_active")
+  notes           String?   @db.Text
+  firebaseId      String?   @map("firebase_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room    Room?          @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  breaks  SessionBreak[]
+
+  @@map("study_sessions")
+  @@index([userId, startTime])
+  @@index([userId])
+  @@index([firebaseId])
+}
+
+model SessionBreak {
+  id              String    @id @default(uuid())
+  sessionId       String    @map("session_id")
+  startTime       DateTime  @map("start_time")
+  endTime         DateTime? @map("end_time")
+  durationMinutes Int?      @map("duration_minutes")
+
+  session StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("session_breaks")
+  @@index([sessionId])
+}
+
+model QuizAttempt {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  quizTitle      String   @map("quiz_title")
+  score          Decimal  @db.Decimal(5, 2)
+  totalQuestions Int      @map("total_questions")
+  correctAnswers Int      @map("correct_answers")
+  firebaseId     String?  @map("firebase_id")
+
+  completedAt DateTime @default(now()) @map("completed_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("quiz_attempts")
+  @@index([userId, completedAt])
+  @@index([firebaseId])
+}

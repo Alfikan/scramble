@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -8,10 +8,10 @@ import {
   signInWithPopup,
   onAuthStateChanged,
   sendEmailVerification,
-} from 'firebase/auth';
-import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
-import { auth, googleProvider, db } from '../config/firebase';
-import { getAuthErrorMessage } from '../utils/authErrors';
+} from "firebase/auth";
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import { auth, googleProvider, db } from "../config/firebase";
+import { getAuthErrorMessage } from "../utils/authErrors";
 
 /**
  * Authentication Context Provider
@@ -22,7 +22,7 @@ const AuthContext = createContext({});
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
   const createUserProfile = async (user, additionalData = {}) => {
     if (!user) return;
 
-    const userRef = doc(db, 'users', user.uid);
+    const userRef = doc(db, "users", user.uid);
     const userSnap = await getDoc(userRef);
 
     if (!userSnap.exists()) {
@@ -43,14 +43,14 @@ export const AuthProvider = ({ children }) => {
       const createdAt = new Date();
 
       const defaultProfile = {
-        displayName: displayName || email?.split('@')[0] || 'User',
+        displayName: displayName || email?.split("@")[0] || "User",
         email,
         photoURL,
         createdAt,
         lastLoginAt: createdAt,
         emailVerified: user.emailVerified,
         // Additional user profile data
-        bio: '',
+        bio: "",
         subjects: [],
         studyPreferences: {
           focusMusic: true,
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }) => {
         await setDoc(userRef, defaultProfile);
         return { ...user, ...defaultProfile };
       } catch (error) {
-        console.error('Error creating user profile:', error);
+        console.error("Error creating user profile:", error);
         throw error;
       }
     } else {
@@ -114,7 +114,7 @@ export const AuthProvider = ({ children }) => {
           setUser(null);
         }
       } catch (error) {
-        console.error('Auth state change error:', error);
+        console.error("Auth state change error:", error);
         setUser(null);
       } finally {
         setLoading(false);
@@ -131,7 +131,7 @@ export const AuthProvider = ({ children }) => {
       const result = await signInWithEmailAndPassword(auth, email, password);
       return { success: true, user: result.user };
     } catch (error) {
-      console.error('Sign in failed:', error);
+      console.error("Sign in failed:", error);
       const errorMessage = getAuthErrorMessage(error.code);
       return { success: false, error: errorMessage };
     } finally {
@@ -143,8 +143,12 @@ export const AuthProvider = ({ children }) => {
   const signUp = async (email, password, displayName) => {
     setLoading(true);
     try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+
       // Update the user's display name
       if (displayName) {
         await firebaseUpdateProfile(result.user, {
@@ -154,17 +158,18 @@ export const AuthProvider = ({ children }) => {
 
       // Send email verification
       await sendEmailVerification(result.user);
-      
+
       // Create user profile in Firestore
       await createUserProfile(result.user, { displayName });
-      
-      return { 
-        success: true, 
+
+      return {
+        success: true,
         user: result.user,
-        message: 'Account created successfully! Please check your email to verify your account.'
+        message:
+          "Account created successfully! Please check your email to verify your account.",
       };
     } catch (error) {
-      console.error('Sign up failed:', error);
+      console.error("Sign up failed:", error);
       const errorMessage = getAuthErrorMessage(error.code);
       return { success: false, error: errorMessage };
     } finally {
@@ -179,7 +184,7 @@ export const AuthProvider = ({ children }) => {
       await firebaseSignOut(auth);
       return { success: true };
     } catch (error) {
-      console.error('Sign out failed:', error);
+      console.error("Sign out failed:", error);
       return { success: false, error: error.message };
     } finally {
       setLoading(false);
@@ -190,12 +195,12 @@ export const AuthProvider = ({ children }) => {
   const resetPassword = async (email) => {
     try {
       await sendPasswordResetEmail(auth, email);
-      return { 
-        success: true, 
-        message: 'Password reset email sent! Check your inbox.' 
+      return {
+        success: true,
+        message: "Password reset email sent! Check your inbox.",
       };
     } catch (error) {
-      console.error('Password reset failed:', error);
+      console.error("Password reset failed:", error);
       const errorMessage = getAuthErrorMessage(error.code);
       return { success: false, error: errorMessage };
     }
@@ -203,21 +208,23 @@ export const AuthProvider = ({ children }) => {
 
   // Update user profile
   const updateProfile = async (updates) => {
-    if (!user) return { success: false, error: 'No user logged in' };
-    
+    if (!user) return { success: false, error: "No user logged in" };
+
     setLoading(true);
     try {
       // Update Firebase Auth profile if display name or photo URL changed
       const authUpdates = {};
-      if (updates.displayName !== undefined) authUpdates.displayName = updates.displayName;
-      if (updates.photoURL !== undefined) authUpdates.photoURL = updates.photoURL;
-      
+      if (updates.displayName !== undefined)
+        authUpdates.displayName = updates.displayName;
+      if (updates.photoURL !== undefined)
+        authUpdates.photoURL = updates.photoURL;
+
       if (Object.keys(authUpdates).length > 0) {
         await firebaseUpdateProfile(auth.currentUser, authUpdates);
       }
 
       // Update Firestore profile
-      const userRef = doc(db, 'users', user.uid);
+      const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
         ...updates,
         updatedAt: new Date(),
@@ -226,10 +233,10 @@ export const AuthProvider = ({ children }) => {
       // Update local user state
       const updatedUser = { ...user, ...updates };
       setUser(updatedUser);
-      
+
       return { success: true, user: updatedUser };
     } catch (error) {
-      console.error('Profile update failed:', error);
+      console.error("Profile update failed:", error);
       return { success: false, error: error.message };
     } finally {
       setLoading(false);
@@ -241,10 +248,14 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      await createUserProfile(result.user, { provider: 'google' });
+      try {
+        await createUserProfile(result.user, { provider: "google" });
+      } catch (profileError) {
+        console.error("Error creating user profile:", profileError);
+      }
       return { success: true, user: result.user };
     } catch (error) {
-      console.error('Google sign in failed:', error);
+      console.error("Google sign in failed:", error);
       const errorMessage = getAuthErrorMessage(error.code);
       return { success: false, error: errorMessage };
     } finally {
@@ -254,16 +265,17 @@ export const AuthProvider = ({ children }) => {
 
   // Send email verification
   const sendVerificationEmail = async () => {
-    if (!auth.currentUser) return { success: false, error: 'No user logged in' };
-    
+    if (!auth.currentUser)
+      return { success: false, error: "No user logged in" };
+
     try {
       await sendEmailVerification(auth.currentUser);
-      return { 
-        success: true, 
-        message: 'Verification email sent! Check your inbox.' 
+      return {
+        success: true,
+        message: "Verification email sent! Check your inbox.",
       };
     } catch (error) {
-      console.error('Email verification failed:', error);
+      console.error("Email verification failed:", error);
       return { success: false, error: error.message };
     }
   };
@@ -280,9 +292,5 @@ export const AuthProvider = ({ children }) => {
     sendVerificationEmail,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

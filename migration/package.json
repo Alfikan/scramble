@@ -1,0 +1,25 @@
+{
+  "name": "scramble-migration",
+  "version": "1.0.0",
+  "description": "Migration scripts from Firebase Firestore to PostgreSQL/Neon",
+  "type": "module",
+  "scripts": {
+    "migrate": "node src/migrate.js",
+    "export-firestore": "node src/export-firestore.js",
+    "import-postgres": "node src/import-postgres.js",
+    "verify": "node src/verify.js",
+    "rollback": "node src/rollback.js",
+    "full-migration": "npm run export-firestore && npm run import-postgres && npm run verify"
+  },
+  "dependencies": {
+    "firebase": "^10.7.0",
+    "@prisma/client": "^5.8.0",
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1",
+    "bcrypt": "^5.1.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.8.0"
+  }
+}
