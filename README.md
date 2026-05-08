@@ -33,7 +33,7 @@ Scramble is a comprehensive collaborative study platform designed for Gen-Z stud
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/scramble.git
+   git clone https://github.com/unkown812/scramble.git
    cd scramble
    ```
 
